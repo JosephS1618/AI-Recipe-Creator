@@ -1,15 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query";
 
-import { getHello } from './api'
+import { getHello } from "./api";
 
 function App() {
-  const hello = useQuery({ queryKey: ['hello'], queryFn: getHello })
+	const hello = useQuery({ queryKey: ["hello"], queryFn: getHello });
 
-  return (
-    <div>
-      {hello.data}
-    </div>
-  )
+	return <div>{hello.data}</div>;
 }
 
-export default App
+export default App;

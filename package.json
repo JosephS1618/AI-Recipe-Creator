@@ -1,15 +1,19 @@
 {
-  "name": "cpsc304-group-project",
-  "workspaces": [
-    "packages/frontend",
-    "packages/backend"
-  ],
-  "scripts": {
-    "start:frontend": "npm run dev -w frontend",
-    "start:backend": "npm run start:dev -w backend",
-    "dev": "concurrently --names \"FRONTEND,BACKEND\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run start:frontend\" \"npm run start:backend\""
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
-  }
+	"name": "cpsc304-group-project",
+	"workspaces": [
+		"packages/frontend",
+		"packages/backend"
+	],
+	"scripts": {
+		"start:frontend": "npm run dev -w frontend",
+		"start:backend": "npm run start:dev -w backend",
+		"dev": "concurrently --names \"FRONTEND,BACKEND\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run start:frontend\" \"npm run start:backend\"",
+		"format": "npx @biomejs/biome check --write",
+		"postinstall": "lefthook install"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.4",
+		"concurrently": "^9.2.1",
+		"lefthook": "^2.1.1"
+	}
 }
