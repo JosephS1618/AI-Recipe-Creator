@@ -1,4 +1,4 @@
-# CPSC 304 Group Project
+# CPSC 304 Group Project 🥑
 
 ## Project Description
 
