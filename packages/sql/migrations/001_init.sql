@@ -1,0 +1,188 @@
+BEGIN;
+
+CREATE TYPE subscription_type AS ENUM ('monthly', 'yearly');
+CREATE TYPE post_visibility AS ENUM ('private', 'public');
+CREATE TYPE emoji_kind AS ENUM ('Positive', 'Negative', 'Neutral');
+
+CREATE TABLE Account(
+  AccountID UUID PRIMARY KEY,
+  Email VARCHAR UNIQUE NOT NULL,
+  Username VARCHAR UNIQUE NOT NULL,
+  Password VARCHAR NOT NULL
+);
+
+CREATE TABLE TrialAccount(
+  AccountID UUID PRIMARY KEY,
+  UsageRemaining INT NOT NULL,
+  TrialStartDate TIMESTAMPTZ NOT NULL,
+  TrialEndDate TIMESTAMPTZ NOT NULL,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Subscription(
+  SubscriptionType subscription_type PRIMARY KEY,
+  SubscriptionPriceInCents INT NOT NULL
+);
+
+CREATE TABLE PaidAccount(
+  AccountID UUID PRIMARY KEY,
+  SubscriptionStartDate TIMESTAMPTZ NOT NULL,
+  SubscriptionEndDate TIMESTAMPTZ NOT NULL,
+  SubscriptionType subscription_type NOT NULL,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (SubscriptionType) REFERENCES Subscription(SubscriptionType)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Recipe(
+  RecipeID UUID PRIMARY KEY,
+  Name VARCHAR NOT NULL,
+  Content VARCHAR NOT NULL,
+  CostInCents INT NOT NULL,
+  Time INT NOT NULL,
+  Cuisine VARCHAR,
+  CreationDate TIMESTAMPTZ NOT NULL,
+  ModificationDate TIMESTAMPTZ NOT NULL,
+  AccountID UUID NOT NULL,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Post(
+  PostID UUID PRIMARY KEY,
+  Title VARCHAR NOT NULL,
+  Body VARCHAR NOT NULL,
+  CreationDate TIMESTAMPTZ NOT NULL,
+  Visibility post_visibility NOT NULL,
+  AccountID UUID NOT NULL,
+  RecipeID UUID,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (RecipeID) REFERENCES Recipe(RecipeID)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE EmojiMeaning(
+  Emoji VARCHAR PRIMARY KEY,
+  Kind emoji_kind NOT NULL
+);
+
+CREATE TABLE PostReaction(
+  PostID UUID,
+  AccountID UUID,
+  Emoji VARCHAR NOT NULL,
+  PRIMARY KEY (PostID, AccountID),
+  FOREIGN KEY (PostID) REFERENCES Post(PostID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (Emoji) REFERENCES EmojiMeaning(Emoji)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Ingredient(
+  Name VARCHAR PRIMARY KEY,
+  Carbs NUMERIC(7,2) NOT NULL,
+  Protein NUMERIC(7,2) NOT NULL,
+  Fat NUMERIC(7,2) NOT NULL
+);
+
+CREATE TABLE RecipeIngredient(
+  RecipeID UUID,
+  IngredientName VARCHAR NOT NULL,
+  Quantity INT NOT NULL,
+  PRIMARY KEY (RecipeID, IngredientName),
+  FOREIGN KEY (RecipeID) REFERENCES Recipe(RecipeID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (IngredientName) REFERENCES Ingredient(Name)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE RecipeNote(
+  RecipeNoteID UUID PRIMARY KEY,
+  Photo VARCHAR,
+  Note VARCHAR NOT NULL,
+  CreationDate TIMESTAMPTZ NOT NULL,
+  ModificationDate TIMESTAMPTZ NOT NULL,
+  AccountID UUID NOT NULL,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE RecipeNoteAnnotatesRecipe(
+  RecipeNoteID UUID,
+  RecipeID UUID,
+  PRIMARY KEY (RecipeNoteID, RecipeID),
+  FOREIGN KEY (RecipeNoteID) REFERENCES RecipeNote(RecipeNoteID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (RecipeID) REFERENCES Recipe(RecipeID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Receipt(
+  ReceiptID UUID PRIMARY KEY,
+  OCRResult VARCHAR,
+  ImageFilePath VARCHAR UNIQUE NOT NULL,
+  CreationDate TIMESTAMPTZ NOT NULL,
+  AccountID UUID NOT NULL,
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Inventory(
+  InventoryID UUID PRIMARY KEY,
+  Name VARCHAR NOT NULL,
+  Description VARCHAR NOT NULL,
+  Type VARCHAR NOT NULL
+);
+
+CREATE TABLE InventoryItem(
+  InventoryItemID INT,
+  InventoryID UUID,
+  Quantity INT NOT NULL,
+  CreationDate TIMESTAMPTZ NOT NULL,
+  ExpirationDate TIMESTAMPTZ,
+  IngredientName VARCHAR NOT NULL,
+  ReceiptID UUID,
+  PRIMARY KEY (InventoryItemID, InventoryID),
+  FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (IngredientName) REFERENCES Ingredient(Name)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  FOREIGN KEY (ReceiptID) REFERENCES Receipt(ReceiptID)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE AccountOwnsInventory(
+  AccountID UUID,
+  InventoryID UUID,
+  PRIMARY KEY (AccountID, InventoryID),
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+COMMIT;
