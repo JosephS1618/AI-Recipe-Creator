@@ -19,6 +19,16 @@ This will start both the frontend and backend servers.
 - The frontend will be available at `http://localhost:5173`.
 - The backend will be available at `http://localhost:3000`.
 
+## Install PostgreSQL
+
+> macOS (Homebrew)
+
+```bash
+brew install postgresql
+brew services start postgresql
+psql --version
+```
+
 ## Database Setup (PostgreSQL needs to be running)
 
 > Run these commands from the `packages/` directory.
