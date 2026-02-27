@@ -1,17 +1,28 @@
 BEGIN;
 
-CREATE TYPE subscription_type AS ENUM ('monthly', 'yearly');
-CREATE TYPE post_visibility AS ENUM ('private', 'public');
-CREATE TYPE emoji_kind AS ENUM ('Positive', 'Negative', 'Neutral');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'subscription_type') THEN
+    CREATE TYPE subscription_type AS ENUM ('monthly', 'yearly');
+  END IF;
 
-CREATE TABLE Account(
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'post_visibility') THEN
+    CREATE TYPE post_visibility AS ENUM ('private', 'public');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'emoji_kind') THEN
+    CREATE TYPE emoji_kind AS ENUM ('Positive', 'Negative', 'Neutral');
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS Account(
   AccountID UUID PRIMARY KEY,
   Email VARCHAR UNIQUE NOT NULL,
   Username VARCHAR UNIQUE NOT NULL,
   Password VARCHAR NOT NULL
 );
 
-CREATE TABLE TrialAccount(
+CREATE TABLE IF NOT EXISTS TrialAccount(
   AccountID UUID PRIMARY KEY,
   UsageRemaining INT NOT NULL,
   TrialStartDate TIMESTAMPTZ NOT NULL,
@@ -21,12 +32,12 @@ CREATE TABLE TrialAccount(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Subscription(
+CREATE TABLE IF NOT EXISTS Subscription(
   SubscriptionType subscription_type PRIMARY KEY,
   SubscriptionPriceInCents INT NOT NULL
 );
 
-CREATE TABLE PaidAccount(
+CREATE TABLE IF NOT EXISTS PaidAccount(
   AccountID UUID PRIMARY KEY,
   SubscriptionStartDate TIMESTAMPTZ NOT NULL,
   SubscriptionEndDate TIMESTAMPTZ NOT NULL,
@@ -39,7 +50,7 @@ CREATE TABLE PaidAccount(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Recipe(
+CREATE TABLE IF NOT EXISTS Recipe(
   RecipeID UUID PRIMARY KEY,
   Name VARCHAR NOT NULL,
   Content VARCHAR NOT NULL,
@@ -54,7 +65,7 @@ CREATE TABLE Recipe(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Post(
+CREATE TABLE IF NOT EXISTS Post(
   PostID UUID PRIMARY KEY,
   Title VARCHAR NOT NULL,
   Body VARCHAR NOT NULL,
@@ -70,12 +81,12 @@ CREATE TABLE Post(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE EmojiMeaning(
+CREATE TABLE IF NOT EXISTS EmojiMeaning(
   Emoji VARCHAR PRIMARY KEY,
   Kind emoji_kind NOT NULL
 );
 
-CREATE TABLE PostReaction(
+CREATE TABLE IF NOT EXISTS PostReaction(
   PostID UUID,
   AccountID UUID,
   Emoji VARCHAR NOT NULL,
@@ -91,14 +102,14 @@ CREATE TABLE PostReaction(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Ingredient(
+CREATE TABLE IF NOT EXISTS Ingredient(
   Name VARCHAR PRIMARY KEY,
   Carbs NUMERIC(7,2) NOT NULL,
   Protein NUMERIC(7,2) NOT NULL,
   Fat NUMERIC(7,2) NOT NULL
 );
 
-CREATE TABLE RecipeIngredient(
+CREATE TABLE IF NOT EXISTS RecipeIngredient(
   RecipeID UUID,
   IngredientName VARCHAR NOT NULL,
   Quantity INT NOT NULL,
@@ -111,7 +122,7 @@ CREATE TABLE RecipeIngredient(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE RecipeNote(
+CREATE TABLE IF NOT EXISTS RecipeNote(
   RecipeNoteID UUID PRIMARY KEY,
   Photo VARCHAR,
   Note VARCHAR NOT NULL,
@@ -123,7 +134,7 @@ CREATE TABLE RecipeNote(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE RecipeNoteAnnotatesRecipe(
+CREATE TABLE IF NOT EXISTS RecipeNoteAnnotatesRecipe(
   RecipeNoteID UUID,
   RecipeID UUID,
   PRIMARY KEY (RecipeNoteID, RecipeID),
@@ -135,7 +146,7 @@ CREATE TABLE RecipeNoteAnnotatesRecipe(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Receipt(
+CREATE TABLE IF NOT EXISTS Receipt(
   ReceiptID UUID PRIMARY KEY,
   OCRResult VARCHAR,
   ImageFilePath VARCHAR UNIQUE NOT NULL,
@@ -146,14 +157,14 @@ CREATE TABLE Receipt(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE Inventory(
+CREATE TABLE IF NOT EXISTS Inventory(
   InventoryID UUID PRIMARY KEY,
   Name VARCHAR NOT NULL,
   Description VARCHAR NOT NULL,
   Type VARCHAR NOT NULL
 );
 
-CREATE TABLE InventoryItem(
+CREATE TABLE IF NOT EXISTS InventoryItem(
   InventoryItemID INT,
   InventoryID UUID,
   Quantity INT NOT NULL,
@@ -173,7 +184,7 @@ CREATE TABLE InventoryItem(
     ON UPDATE CASCADE
 );
 
-CREATE TABLE AccountOwnsInventory(
+CREATE TABLE IF NOT EXISTS AccountOwnsInventory(
   AccountID UUID,
   InventoryID UUID,
   PRIMARY KEY (AccountID, InventoryID),
