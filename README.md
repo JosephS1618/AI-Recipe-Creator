@@ -23,6 +23,12 @@ This will start both the frontend and backend servers.
 
 ## Database Setup (PostgreSQL needs to be running)
 
+## Creates the database, runs the initial migration and add a demo account
+
+```bash
+chmod +x scripts/db_setup.sh
+./scripts/db_setup.sh
+
 ## Create the database
 
 ``` bash
