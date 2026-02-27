@@ -19,6 +19,7 @@ This will start both the frontend and backend servers.
 - The frontend will be available at `http://localhost:5173`.
 - The backend will be available at `http://localhost:3000`.
 
+
 ## Database Setup (PostgreSQL needs to be running)
 
 ## Create the database
