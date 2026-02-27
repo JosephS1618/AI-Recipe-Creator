@@ -29,25 +29,3 @@ This will start both the frontend and backend servers.
 chmod +x scripts/db_setup.sh
 ./scripts/db_setup.sh
 
-## Create the database
-
-``` bash
-createdb cpsc_304_project
-```
-
-## Run schema migration
-
-``` bash
-psql -d cpsc_304_project -f sql/migrations/001_init.sql
-```
-
-This should creates all the tables, types, constraints & relationships etc
-
-## Inserting test data (just adds a "demo" account to the account relation)
-
-``` bash
-psql -d cpsc_304_project -f sql/test_data/test_insert.sql
-```
-
-This inserts demo data for development.
-
