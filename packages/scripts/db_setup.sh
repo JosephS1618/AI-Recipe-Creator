@@ -6,7 +6,7 @@ DATABASE_NAME="cpsc_304_project"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 MIGRATION_SQL="$SCRIPT_DIR/../sql/migrations/001_init.sql"
-TEST_DATA_SQL="$SCRIPT_DIR/../sql/test_data/test_insert.sql"
+TEST_DATA_SQL="$SCRIPT_DIR/test_data/test_insert.sql"
 
 createdb "$DATABASE_NAME" 2>/dev/null || true
 

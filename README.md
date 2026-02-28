@@ -41,4 +41,12 @@ This will:
 ```bash
 chmod +x scripts/db_setup.sh
 ./scripts/db_setup.sh
+```
+
+> Running individual scripts
+
+```bash
+psql -d name_of_database -f name_of_script.sql
+```
+
 
