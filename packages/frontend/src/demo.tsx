@@ -12,9 +12,9 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 	const removeIngredient = useRemoveIngredient();
 	const editIngredient = useEditIngredient();
 
-	const [carbs, setCarbs] = useState(ingredient.carbs);
-	const [protein, setProtein] = useState(ingredient.protein);
-	const [fat, setFat] = useState(ingredient.fat);
+	const [carbs, setCarbs] = useState(Number(ingredient.carbs));
+	const [protein, setProtein] = useState(Number(ingredient.protein));
+	const [fat, setFat] = useState(Number(ingredient.fat));
 
 	return (
 		<div>
@@ -62,9 +62,9 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 					onClick={() =>
 						editIngredient.mutate({
 							name: ingredient.name,
-							carbs,
-							protein,
-							fat,
+							carbs: Number(carbs),
+							protein: Number(protein),
+							fat: Number(fat),
 						})
 					}
 				>
