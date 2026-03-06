@@ -89,7 +89,7 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 							);
 						}}
 					>
-						Save
+						Update
 					</Button>
 
 					<Button
