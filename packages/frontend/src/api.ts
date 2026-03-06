@@ -7,7 +7,13 @@ export type IngredientItem = {
 	fat: number;
 };
 
-async function request(path: string, init?: RequestInit): Promise<void> {
+type ApiResponse<T> = {
+	ok: boolean;
+	msg: string;
+	data: T;
+};
+
+async function requestData<T>(path: string, init?: RequestInit): Promise<T> {
 	const res = await fetch(`${BASE_URL}${path}`, {
 		...init,
 		headers: {
@@ -16,13 +22,21 @@ async function request(path: string, init?: RequestInit): Promise<void> {
 		},
 	});
 
-	if (!res.ok) {
-		throw new Error(await res.text());
+	const body = (await res.json()) as ApiResponse<T>;
+
+	if (!res.ok || !body.ok) {
+		throw new Error(body.msg);
 	}
+
+	return body.data;
+}
+
+async function request(path: string, init?: RequestInit): Promise<void> {
+	await requestData<null>(path, init);
 }
 
 export function getIngredients(): Promise<IngredientItem[]> {
-	return fetch(`${BASE_URL}/ingredients`).then((res) => res.json());
+	return requestData<IngredientItem[]>("/ingredients");
 }
 
 export function addIngredient(item: IngredientItem): Promise<void> {
