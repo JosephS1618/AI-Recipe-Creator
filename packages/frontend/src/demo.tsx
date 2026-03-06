@@ -155,20 +155,6 @@ function AddIngredient() {
 	const [protein, setProtein] = useState(0);
 	const [fat, setFat] = useState(0);
 
-	const handleAdd = () => {
-		addIngredient.mutate(
-			{ name, carbs, protein, fat },
-			{
-				onSuccess: () => {
-					setName("");
-					setCarbs(0);
-					setProtein(0);
-					setFat(0);
-				},
-			},
-		);
-	};
-
 	return (
 		<Card>
 			<CardHeader>
@@ -177,9 +163,10 @@ function AddIngredient() {
 
 			<CardContent className="grid gap-4 md:grid-cols-4">
 				<div className="grid gap-2">
-					<Label htmlFor="add-name">Name</Label>
+					<Label htmlFor="name">Name</Label>
 					<Input
-						id="add-name"
+						id="name"
+						name="name"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 						placeholder=""
@@ -187,9 +174,10 @@ function AddIngredient() {
 				</div>
 
 				<div className="grid gap-2">
-					<Label htmlFor="add-carbs">Carbs</Label>
+					<Label htmlFor="carbs">Carbs</Label>
 					<Input
-						id="add-carbs"
+						id="carbs"
+						name="carbs"
 						type="number"
 						min={0}
 						value={carbs}
@@ -201,9 +189,10 @@ function AddIngredient() {
 				</div>
 
 				<div className="grid gap-2">
-					<Label htmlFor="add-protein">Protein</Label>
+					<Label htmlFor="protein">Protein</Label>
 					<Input
-						id="add-protein"
+						id="protein"
+						name="protein"
 						type="number"
 						min={0}
 						value={protein}
@@ -215,9 +204,10 @@ function AddIngredient() {
 				</div>
 
 				<div className="grid gap-2">
-					<Label htmlFor="add-fat">Fat</Label>
+					<Label htmlFor="fat">Fat</Label>
 					<Input
-						id="add-fat"
+						id="fat"
+						name="fat"
 						type="number"
 						min={0}
 						value={fat}
@@ -229,7 +219,23 @@ function AddIngredient() {
 				</div>
 
 				<div className="md:col-span-4">
-					<Button onClick={handleAdd}>Add Ingredient</Button>
+					<Button
+						onClick={() =>
+							addIngredient.mutate(
+								{ name, carbs, protein, fat },
+								{
+									onSuccess: () => {
+										setName("");
+										setCarbs(0);
+										setProtein(0);
+										setFat(0);
+									},
+								},
+							)
+						}
+					>
+						Add Ingredient
+					</Button>
 				</div>
 			</CardContent>
 		</Card>
