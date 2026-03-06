@@ -119,7 +119,9 @@ function IngredientsList() {
 
 			<CardContent>
 				{ingredients.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No ingredients found.</p>
+					<p className="text-sm text-muted-foreground">
+						Added ingredients will show up here
+					</p>
 				) : (
 					<Table>
 						<TableHeader>
