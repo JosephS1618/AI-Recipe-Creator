@@ -1,5 +1,16 @@
 import { useState } from "react";
-
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { type IngredientItem } from "./api";
 import {
 	useAddIngredient,
@@ -16,62 +27,84 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 	const [protein, setProtein] = useState(Number(ingredient.protein));
 	const [fat, setFat] = useState(Number(ingredient.fat));
 
+	const [updateMessage, setUpdateMessage] = useState("");
+
 	return (
-		<div>
-			<form action="">
-				<label htmlFor="name">Name</label>
-				<input
-					type="text"
-					id="name"
-					name="name"
-					value={ingredient.name}
-					disabled
-				/>
-				<label htmlFor="carbs">Carbs</label>
-				<input
+		<TableRow>
+			<TableCell className="font-medium">{ingredient.name}</TableCell>
+
+			<TableCell>
+				<Input
 					type="number"
-					id="carbs"
-					name="carbs"
+					min={0}
 					value={carbs}
-					onChange={(e) => setCarbs(Number(e.target.value))}
+					onChange={(e) => setCarbs(Math.max(0, Number(e.target.value)))}
+					className="w-24"
 				/>
-				<label htmlFor="protein">Protein</label>
-				<input
+			</TableCell>
+
+			<TableCell>
+				<Input
 					type="number"
-					id="protein"
-					name="protein"
+					min={0}
 					value={protein}
-					onChange={(e) => setProtein(Number(e.target.value))}
+					onChange={(e) => setProtein(Math.max(0, Number(e.target.value)))}
+					className="w-24"
 				/>
-				<label htmlFor="fat">Fat</label>
-				<input
+			</TableCell>
+
+			<TableCell>
+				<Input
 					type="number"
-					id="fat"
-					name="fat"
+					min={0}
 					value={fat}
-					onChange={(e) => setFat(Number(e.target.value))}
+					onChange={(e) => setFat(Math.max(0, Number(e.target.value)))}
+					className="w-24"
 				/>
-				<button
-					type="button"
-					onClick={() => removeIngredient.mutate({ name: ingredient.name })}
-				>
-					Remove Ingredient
-				</button>
-				<button
-					type="button"
-					onClick={() =>
-						editIngredient.mutate({
-							name: ingredient.name,
-							carbs: Number(carbs),
-							protein: Number(protein),
-							fat: Number(fat),
-						})
-					}
-				>
-					Edit Ingredient
-				</button>
-			</form>
-		</div>
+			</TableCell>
+
+			<TableCell>
+				<div className="flex gap-2">
+					<Button
+						variant="default"
+						onClick={() => {
+							setUpdateMessage("Updating...");
+
+							editIngredient.mutate(
+								{
+									name: ingredient.name,
+									carbs,
+									protein,
+									fat,
+								},
+								{
+									onSuccess: () => {
+										setUpdateMessage(`Updated: ${ingredient.name}`);
+										setTimeout(() => setUpdateMessage(""), 2250);
+									},
+									onError: () => {
+										setUpdateMessage("Failed to save");
+									},
+								},
+							);
+						}}
+					>
+						Save
+					</Button>
+
+					<Button
+						variant="destructive"
+						onClick={() => removeIngredient.mutate({ name: ingredient.name })}
+					>
+						Remove
+					</Button>
+				</div>
+
+				{updateMessage && (
+					<p className="mt-2 text-sm text-muted-foreground">{updateMessage}</p>
+				)}
+			</TableCell>
+		</TableRow>
 	);
 }
 
@@ -79,74 +112,137 @@ function IngredientsList() {
 	const { data: ingredients = [] } = useFetchIngredients();
 
 	return (
-		<div>
-			<h1>Ingredients</h1>
-			{ingredients.length === 0 && <p>No ingredients found</p>}
-			{ingredients.map((ingredient) => (
-				<IngredientListItem key={ingredient.name} ingredient={ingredient} />
-			))}
-		</div>
+		<Card>
+			<CardHeader>
+				<CardTitle>Ingredients</CardTitle>
+			</CardHeader>
+
+			<CardContent>
+				{ingredients.length === 0 ? (
+					<p className="text-sm text-muted-foreground">No ingredients found.</p>
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Name</TableHead>
+								<TableHead>Carbs</TableHead>
+								<TableHead>Protein</TableHead>
+								<TableHead>Fat</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+
+						<TableBody>
+							{ingredients.map((ingredient) => (
+								<IngredientListItem
+									key={ingredient.name}
+									ingredient={ingredient}
+								/>
+							))}
+						</TableBody>
+					</Table>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
 
 function AddIngredient() {
 	const addIngredient = useAddIngredient();
+
 	const [name, setName] = useState("");
 	const [carbs, setCarbs] = useState(0);
 	const [protein, setProtein] = useState(0);
 	const [fat, setFat] = useState(0);
 
+	const handleAdd = () => {
+		addIngredient.mutate(
+			{ name, carbs, protein, fat },
+			{
+				onSuccess: () => {
+					setName("");
+					setCarbs(0);
+					setProtein(0);
+					setFat(0);
+				},
+			},
+		);
+	};
+
 	return (
-		<div>
-			<form>
-				<label htmlFor="name">Name</label>
-				<input
-					type="text"
-					id="name"
-					name="name"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-				/>
-				<label htmlFor="carbs">Carbs</label>
-				<input
-					type="number"
-					id="carbs"
-					name="carbs"
-					value={carbs}
-					onChange={(e) => setCarbs(Number(e.target.value))}
-				/>
-				<label htmlFor="protein">Protein</label>
-				<input
-					type="number"
-					id="protein"
-					name="protein"
-					value={protein}
-					onChange={(e) => setProtein(Number(e.target.value))}
-				/>
-				<label htmlFor="fat">Fat</label>
-				<input
-					type="number"
-					id="fat"
-					name="fat"
-					value={fat}
-					onChange={(e) => setFat(Number(e.target.value))}
-				/>
-				<button
-					type="button"
-					onClick={() => addIngredient.mutate({ name, carbs, protein, fat })}
-				>
-					Add Ingredient
-				</button>
-			</form>
-		</div>
+		<Card>
+			<CardHeader>
+				<CardTitle>Add Ingredient</CardTitle>
+			</CardHeader>
+
+			<CardContent className="grid gap-4 md:grid-cols-4">
+				<div className="grid gap-2">
+					<Label htmlFor="add-name">Name</Label>
+					<Input
+						id="add-name"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						placeholder=""
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="add-carbs">Carbs</Label>
+					<Input
+						id="add-carbs"
+						type="number"
+						min={0}
+						value={carbs}
+						onChange={(e) => {
+							const value = e.currentTarget.valueAsNumber;
+							setCarbs(Math.max(0, Number.isNaN(value) ? 0 : value));
+						}}
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="add-protein">Protein</Label>
+					<Input
+						id="add-protein"
+						type="number"
+						min={0}
+						value={protein}
+						onChange={(e) => {
+							const value = e.currentTarget.valueAsNumber;
+							setProtein(Math.max(0, Number.isNaN(value) ? 0 : value));
+						}}
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="add-fat">Fat</Label>
+					<Input
+						id="add-fat"
+						type="number"
+						min={0}
+						value={fat}
+						onChange={(e) => {
+							const value = e.currentTarget.valueAsNumber;
+							setFat(Math.max(0, Number.isNaN(value) ? 0 : value));
+						}}
+					/>
+				</div>
+
+				<div className="md:col-span-4">
+					<Button onClick={handleAdd}>Add Ingredient</Button>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }
 
 export function Demo() {
 	return (
-		<div>
-			<IngredientsList />
-			<AddIngredient />
-		</div>
+		<main className="min-h-screen bg-background p-6 text-foreground">
+			<div className="mx-auto flex max-w-5xl flex-col gap-6">
+				<IngredientsList />
+				<AddIngredient />
+			</div>
+		</main>
 	);
 }
