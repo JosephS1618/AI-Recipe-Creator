@@ -83,7 +83,7 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 										setTimeout(() => setUpdateMessage(""), 2250);
 									},
 									onError: () => {
-										setUpdateMessage("Failed to save");
+										setUpdateMessage("Update failed");
 									},
 								},
 							);
