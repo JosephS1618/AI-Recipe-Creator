@@ -27,7 +27,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 		const msg =
 			exception instanceof HttpException
 				? this.getHttpExceptionMessage(exception)
-				: "Internal server error";
+				: this.getUnknownExceptionMessage(exception);
 
 		this.logException(exception, status);
 
@@ -52,6 +52,14 @@ export class ApiExceptionFilter implements ExceptionFilter {
 		this.logger.error(
 			`Request failed with status ${status}: ${inspect(exception)}`,
 		);
+	}
+
+	private getUnknownExceptionMessage(exception: unknown): string {
+		if (exception instanceof Error) {
+			return exception.message;
+		}
+
+		return inspect(exception);
 	}
 
 	private getHttpExceptionMessage(exception: HttpException): string {
