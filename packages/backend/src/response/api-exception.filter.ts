@@ -1,9 +1,11 @@
+import { inspect } from "node:util";
 import {
 	ArgumentsHost,
 	Catch,
 	ExceptionFilter,
 	HttpException,
 	HttpStatus,
+	Logger,
 } from "@nestjs/common";
 import type { Response } from "express";
 
@@ -11,6 +13,8 @@ import type { ApiResponse } from "./api-response";
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
+	private readonly logger = new Logger(ApiExceptionFilter.name);
+
 	catch(exception: unknown, host: ArgumentsHost): void {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
@@ -25,6 +29,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
 				? this.getHttpExceptionMessage(exception)
 				: "Internal server error";
 
+		this.logException(exception, status);
+
 		const body: ApiResponse<null> = {
 			ok: false,
 			msg,
@@ -32,6 +38,20 @@ export class ApiExceptionFilter implements ExceptionFilter {
 		};
 
 		response.status(status).json(body);
+	}
+
+	private logException(exception: unknown, status: number): void {
+		if (exception instanceof Error) {
+			this.logger.error(
+				`Request failed with status ${status}: ${exception.message}`,
+				exception.stack,
+			);
+			return;
+		}
+
+		this.logger.error(
+			`Request failed with status ${status}: ${inspect(exception)}`,
+		);
 	}
 
 	private getHttpExceptionMessage(exception: HttpException): string {
