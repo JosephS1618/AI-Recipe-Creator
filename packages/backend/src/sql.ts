@@ -1,5 +1,6 @@
 import postgres from "postgres";
 
-export const sql = postgres(
-	"postgres://postgres:postgres@localhost:5432/cpsc_304_project",
-);
+const DATABASE_URL =
+	process.env.DATABASE_URL ?? "postgres://localhost:5432/cpsc_304_project";
+
+export const sql = postgres(DATABASE_URL);
