@@ -46,7 +46,7 @@ export class IngredientService {
 
 	async list(): Promise<IngredientItem[]> {
 		return sql<IngredientItem[]>`
-			SELECT * FROM Ingredient;
+			SELECT * FROM Ingredient ORDER BY Name ASC;
 		`;
 	}
 }
