@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
 	ChefHat,
+	CircleUserRound,
 	FileText,
 	LayoutDashboard,
 	LogIn,
@@ -8,57 +9,53 @@ import {
 	Package2,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router";
+import { useAccountSession } from "@/components/account-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type NavigationItem = {
 	title: string;
-	description: string;
 	icon: LucideIcon;
 	to: string;
 };
 
 export const navigationItems: NavigationItem[] = [
 	{
-		title: "Demo",
-		description: "Overview of the frontend shell.",
-		icon: LayoutDashboard,
-		to: "/demo",
-	},
-	{
 		title: "Login",
-		description: "Authentication entry point.",
 		icon: LogIn,
 		to: "/login",
 	},
 	{
+		title: "Demo",
+		icon: LayoutDashboard,
+		to: "/demo",
+	},
+	{
 		title: "Inventories",
-		description: "Inventory management workspace.",
 		icon: Package2,
 		to: "/inventories",
 	},
 	{
 		title: "Recipes",
-		description: "Recipe browsing and authoring.",
 		icon: ChefHat,
 		to: "/recipes",
 	},
 	{
 		title: "Community Post",
-		description: "Community discussion feed.",
 		icon: MessageSquare,
 		to: "/community-post",
 	},
 	{
 		title: "Recipe Notes",
-		description: "Saved notes and annotations.",
 		icon: FileText,
 		to: "/recipe-notes",
 	},
 ];
 
 function NavigationLinks({ compact = false }: { compact?: boolean }) {
+	const { currentUser } = useAccountSession();
+
 	return (
 		<nav
 			className={cn(
@@ -66,26 +63,35 @@ function NavigationLinks({ compact = false }: { compact?: boolean }) {
 				compact ? "overflow-x-auto pb-1" : "flex-col",
 			)}
 		>
-			{navigationItems.map((item) => (
-				<NavLink
-					key={item.to}
-					to={item.to}
-					className={({ isActive }) =>
-						cn(
-							buttonVariants({
-								variant: isActive ? "secondary" : "ghost",
-								size: compact ? "sm" : "default",
-							}),
-							compact
-								? "min-w-fit shrink-0"
-								: "h-auto justify-start gap-3 px-3 py-3",
-						)
-					}
-				>
-					<item.icon className="size-4" />
-					<span>{item.title}</span>
-				</NavLink>
-			))}
+			{navigationItems.map((item) => {
+				const Icon =
+					item.to === "/login" && currentUser ? CircleUserRound : item.icon;
+
+				return (
+					<NavLink
+						key={item.to}
+						to={item.to}
+						className={({ isActive }) =>
+							cn(
+								buttonVariants({
+									variant: isActive ? "secondary" : "ghost",
+									size: compact ? "sm" : "default",
+								}),
+								compact
+									? "min-w-fit shrink-0"
+									: "h-auto justify-start gap-3 px-3 py-3",
+							)
+						}
+					>
+						<Icon className="size-4" />
+						<span>
+							{item.to === "/login" && currentUser
+								? currentUser.username
+								: item.title}
+						</span>
+					</NavLink>
+				);
+			})}
 		</nav>
 	);
 }

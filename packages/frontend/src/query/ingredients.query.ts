@@ -4,9 +4,9 @@ import {
 	addIngredient,
 	editIngredient,
 	getIngredients,
-	type IngredientItem,
 	removeIngredient,
-} from "./api";
+} from "./ingredients.api";
+import type { IngredientItem } from "./ingredients.types";
 
 export const useFetchIngredients = () => {
 	return useQuery({ queryKey: ["ingredients"], queryFn: getIngredients });

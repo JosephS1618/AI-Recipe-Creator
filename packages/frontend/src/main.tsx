@@ -8,6 +8,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import { toast } from "sonner";
+import { AccountProvider } from "@/components/account-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./index.css";
@@ -32,7 +33,9 @@ if (elm) {
 	createRoot(elm).render(
 		<StrictMode>
 			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router} />
+				<AccountProvider>
+					<RouterProvider router={router} />
+				</AccountProvider>
 				<Toaster position="top-center" />
 			</QueryClientProvider>
 		</StrictMode>,

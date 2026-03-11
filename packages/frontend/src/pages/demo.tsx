@@ -11,13 +11,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { type IngredientItem } from "../api";
 import {
+	type IngredientItem,
 	useAddIngredient,
 	useEditIngredient,
 	useFetchIngredients,
 	useRemoveIngredient,
-} from "../query";
+} from "@/query";
 
 function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 	const removeIngredient = useRemoveIngredient();
