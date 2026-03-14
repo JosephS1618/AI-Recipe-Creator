@@ -26,8 +26,8 @@ export const DeleteInventoryItemSchema = z.object({
 	inventory_item_id: z.number().int(),
 });
 
-export type InventoryItemBody = z.infer<typeof InventoryItemBodySchema>;
 export type InventoryItem = z.infer<typeof InventoryItemSchema>;
+export type InventoryItemBody = z.infer<typeof InventoryItemBodySchema>;
 export type EditInventoryItemBody = z.infer<typeof EditInventoryItemSchema>;
 export type DeleteInventoryItem = z.infer<typeof DeleteInventoryItemSchema>;
 
