@@ -2,6 +2,8 @@ export * from "./auth.query";
 export type * from "./auth.types";
 export * from "./ingredients.query";
 export type * from "./ingredients.types";
+export * from "./inventories.query";
+export type * from "./inventories.types";
 export * from "./session.utils";
 export * from "./subscription.query";
 export type * from "./subscription.types";

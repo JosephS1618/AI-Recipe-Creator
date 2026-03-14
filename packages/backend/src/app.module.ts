@@ -6,6 +6,8 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { IngredientController } from "./ingredients.controller";
 import { IngredientService } from "./ingredients.service";
+import { InventoriesController } from "./inventories.controller";
+import { InventoriesService } from "./inventories.service";
 import { InventoryItemsController } from "./inventoryItems.controller";
 import { InventoryItemsService } from "./inventoryItems.service";
 import { ApiExceptionFilter } from "./response/api-exception.filter";
@@ -18,6 +20,7 @@ import { SubscriptionService } from "./subscription.service";
 	controllers: [
 		AuthController,
 		IngredientController,
+		InventoriesController,
 		InventoryItemsController,
 		SubscriptionController,
 	],
@@ -28,6 +31,7 @@ import { SubscriptionService } from "./subscription.service";
 		{ provide: APP_FILTER, useClass: ApiExceptionFilter },
 		AuthService,
 		IngredientService,
+		InventoriesService,
 		InventoryItemsService,
 		SubscriptionService,
 	],
