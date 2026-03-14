@@ -3,6 +3,7 @@ import { Layout } from "./components/layout";
 import { CommunityPost } from "./pages/community-post";
 import { Demo } from "./pages/demo";
 import { Inventories } from "./pages/inventories";
+import { InventoryDetail } from "./pages/inventory-detail";
 import { Login } from "./pages/login";
 import { RecipeNotes } from "./pages/recipe-notes";
 import { Recipes } from "./pages/recipes";
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
 			{
 				path: "inventories",
 				Component: Inventories,
+			},
+			{
+				path: "inventories/:inventoryId",
+				Component: InventoryDetail,
 			},
 			{
 				path: "recipes",

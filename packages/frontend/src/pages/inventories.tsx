@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useAccountSession } from "@/components/account-provider";
 import { InventoryDialog } from "@/components/inventory-dialog";
@@ -156,7 +156,9 @@ export function Inventories() {
 									{inventories.map((inventory) => (
 										<TableRow key={inventory.inventoryid}>
 											<TableCell className="font-medium">
-												{inventory.name}
+												<Link to={`/inventories/${inventory.inventoryid}`}>
+													{inventory.name}
+												</Link>
 											</TableCell>
 											<TableCell>{inventory.type}</TableCell>
 											<TableCell className="text-muted-foreground max-w-xs truncate">
