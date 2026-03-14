@@ -17,8 +17,8 @@ export const InventoryItemSchema = InventoryItemBodySchema.extend({
 	inventory_id: z.string().uuid(),
 });
 
-export const EditInventoryItemSchema = InventoryItemBodySchema.extend({
-	inventory_item_id: z.number().int(),
+export const EditInventoryItemSchema = InventoryItemSchema.omit({
+	inventory_id: true,
 });
 
 export const DeleteInventoryItemSchema = z.object({
@@ -69,17 +69,17 @@ export class InventoryItemsService {
 	}
 
 	async add(item: CreateInventoryItem): Promise<void> {
-		const nextInventoryItemIDRows = await sql<{ next_id: number }[]>`
-			SELECT COALESCE(MAX(InventoryItemID), 0) + 1 AS next_id
+		const [{ max_item_id }] = await sql<{ max_item_id: number }[]>`
+			SELECT COALESCE(MAX(InventoryItemID), 0) AS max_item_id
 			FROM InventoryItem
 			WHERE InventoryID = ${item.inventory_id};
 		`;
 
-		const inventory_item_id = nextInventoryItemIDRows[0].next_id;
+		const new_inventory_item_id = max_item_id + 1;
 
 		await sql`
 			INSERT INTO InventoryItem (InventoryItemID, InventoryID, Quantity, CreationDate, ExpirationDate, IngredientName, ReceiptID)
-			VALUES (${inventory_item_id}, ${item.inventory_id}, ${item.quantity}, ${item.creation_date}, ${item.expiration_date}, ${item.ingredient_name}, ${item.receipt_id})
+			VALUES (${new_inventory_item_id}, ${item.inventory_id}, ${item.quantity}, ${item.creation_date}, ${item.expiration_date}, ${item.ingredient_name}, ${item.receipt_id})
 		`;
 	}
 
