@@ -2,9 +2,11 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 
 import {
 	CreateInventoryItemDto,
+	DeleteInventoryItemDto,
 	EditInventoryItemDto,
-	InventoryItemsService,
-} from "./inventoryItems.service";
+} from "./inventoryItems.dto";
+
+import { InventoryItemsService } from "./inventoryItems.service";
 
 @Controller("inventory/:inventoryId/items")
 export class InventoryItemsController {
@@ -29,11 +31,11 @@ export class InventoryItemsController {
 	@Post("delete")
 	async remove(
 		@Param("inventoryId") inventoryId: string,
-		@Body("inventory_item_id") inventory_item_id: number,
+		@Body() item: DeleteInventoryItemDto,
 	) {
 		await this.service.remove({
+			...item,
 			inventory_id: inventoryId,
-			inventory_item_id,
 		});
 	}
 
