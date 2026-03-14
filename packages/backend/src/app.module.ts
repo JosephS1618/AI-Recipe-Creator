@@ -6,12 +6,14 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { IngredientController } from "./ingredients.controller";
 import { IngredientService } from "./ingredients.service";
+import { InventoryItemsController } from "./inventoryItems.controller";
+import { InventoryItemsService } from "./inventoryItems.service";
 import { ApiExceptionFilter } from "./response/api-exception.filter";
 import { ApiResponseInterceptor } from "./response/api-response.interceptor";
 
 @Module({
 	imports: [],
-	controllers: [AuthController, IngredientController],
+	controllers: [AuthController, IngredientController, InventoryItemsController],
 	providers: [
 		{ provide: APP_PIPE, useClass: ZodValidationPipe },
 		{ provide: APP_INTERCEPTOR, useClass: ApiResponseInterceptor },
@@ -19,6 +21,7 @@ import { ApiResponseInterceptor } from "./response/api-response.interceptor";
 		{ provide: APP_FILTER, useClass: ApiExceptionFilter },
 		AuthService,
 		IngredientService,
+		InventoryItemsService,
 	],
 })
 export class AppModule {}
