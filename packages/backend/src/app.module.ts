@@ -10,10 +10,17 @@ import { InventoryItemsController } from "./inventoryItems.controller";
 import { InventoryItemsService } from "./inventoryItems.service";
 import { ApiExceptionFilter } from "./response/api-exception.filter";
 import { ApiResponseInterceptor } from "./response/api-response.interceptor";
+import { SubscriptionController } from "./subscription.controller";
+import { SubscriptionService } from "./subscription.service";
 
 @Module({
 	imports: [],
-	controllers: [AuthController, IngredientController, InventoryItemsController],
+	controllers: [
+		AuthController,
+		IngredientController,
+		InventoryItemsController,
+		SubscriptionController,
+	],
 	providers: [
 		{ provide: APP_PIPE, useClass: ZodValidationPipe },
 		{ provide: APP_INTERCEPTOR, useClass: ApiResponseInterceptor },
@@ -22,6 +29,7 @@ import { ApiResponseInterceptor } from "./response/api-response.interceptor";
 		AuthService,
 		IngredientService,
 		InventoryItemsService,
+		SubscriptionService,
 	],
 })
 export class AppModule {}

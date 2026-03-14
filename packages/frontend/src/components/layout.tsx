@@ -7,6 +7,7 @@ import {
 	LogIn,
 	MessageSquare,
 	Package2,
+	Settings,
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router";
 import { useAccountSession } from "@/components/account-provider";
@@ -50,6 +51,11 @@ export const navigationItems: NavigationItem[] = [
 		title: "Recipe Notes",
 		icon: FileText,
 		to: "/recipe-notes",
+	},
+	{
+		title: "Settings",
+		icon: Settings,
+		to: "/settings",
 	},
 ];
 

@@ -6,6 +6,7 @@ import { Inventories } from "./pages/inventories";
 import { Login } from "./pages/login";
 import { RecipeNotes } from "./pages/recipe-notes";
 import { Recipes } from "./pages/recipes";
+import SettingsPage from "./pages/settings";
 
 function IndexRedirect() {
 	return <Navigate to="/demo" replace />;
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
 			{
 				path: "recipe-notes",
 				Component: RecipeNotes,
+			},
+			{
+				path: "settings",
+				Component: SettingsPage,
 			},
 		],
 	},

@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { sql } from "./sql";
 
-const AccountSummarySchema = z.object({
+export const AccountSummarySchema = z.object({
 	accountId: z.string().uuid(),
 	email: z.string().email(),
 	username: z.string(),
