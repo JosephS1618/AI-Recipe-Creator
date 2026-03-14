@@ -64,7 +64,7 @@ export class InventoryItemsService {
 				ReceiptID AS receipt_id
 			FROM InventoryItem
 			WHERE InventoryID = ${inventory_id}
-			ORDER BY InventoryItemID ASC;
+			ORDER BY InventoryItemID;
 		`;
 	}
 
