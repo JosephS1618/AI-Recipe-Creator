@@ -1,7 +1,299 @@
-import { useParams } from "react-router";
+import { useMemo, useState } from "react";
+import { Link, useParams } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
+	type DeleteInventoryItem,
+	type InventoryItem,
+	useAddInventoryItem,
+	useEditInventoryItem,
+	useGetInventoryItems,
+	useRemoveInventoryItem,
+} from "@/query";
+
+function formattedDate(value: string | null) {
+	if (!value) return "";
+	return value.slice(0, 10);
+}
+
+function dateFromToday(daysFromToday: number) {
+	const date = new Date();
+	date.setDate(date.getDate() + daysFromToday);
+	return date.toISOString().slice(0, 10);
+}
+
+function InventoryItemList({
+	inventoryId,
+	item,
+}: {
+	inventoryId: string;
+	item: InventoryItem;
+}) {
+	const editInventoryItem = useEditInventoryItem();
+	const removeInventoryItem = useRemoveInventoryItem();
+
+	const [quantity, setQuantity] = useState(item.quantity);
+	const [creationDate, setCreationDate] = useState(
+		formattedDate(item.creation_date),
+	);
+	const [expirationDate, setExpirationDate] = useState(
+		formattedDate(item.expiration_date),
+	);
+
+	return (
+		<TableRow>
+			<TableCell className="font-medium">{item.ingredient_name}</TableCell>
+
+			<TableCell>
+				<Input
+					type="number"
+					min={0}
+					value={quantity}
+					onChange={(e) => {
+						const value = e.currentTarget.valueAsNumber;
+						setQuantity(Math.max(0, Number.isNaN(value) ? 0 : value));
+					}}
+					className="w-24"
+				/>
+			</TableCell>
+
+			<TableCell>
+				<Input
+					type="date"
+					value={creationDate}
+					onChange={(e) => setCreationDate(e.target.value)}
+					className="min-w-36"
+				/>
+			</TableCell>
+
+			<TableCell>
+				<Input
+					type="date"
+					value={expirationDate}
+					onChange={(e) => setExpirationDate(e.target.value)}
+					className="min-w-36"
+				/>
+			</TableCell>
+
+			<TableCell>
+				<div className="flex flex-wrap gap-2">
+					<Button
+						onClick={() => {
+							editInventoryItem.mutate({
+								inventoryId,
+								item: {
+									inventory_item_id: item.inventory_item_id,
+									inventory_id: inventoryId,
+									ingredient_name: item.ingredient_name,
+									quantity,
+									creation_date: creationDate,
+									expiration_date: expirationDate || null,
+									receipt_id: item.receipt_id ?? null,
+								},
+							});
+						}}
+					>
+						Update
+					</Button>
+
+					<Button
+						variant="destructive"
+						onClick={() => {
+							removeInventoryItem.mutate({
+								inventoryId,
+								item: {
+									inventory_item_id: item.inventory_item_id,
+									inventory_id: inventoryId,
+								} as DeleteInventoryItem & { inventory_id: string },
+							});
+						}}
+					>
+						Remove
+					</Button>
+				</div>
+			</TableCell>
+		</TableRow>
+	);
+}
+
+function InventoryItemsList({ inventoryId }: { inventoryId: string }) {
+	const { data: itemsData } = useGetInventoryItems(inventoryId);
+
+	const items = Array.isArray(itemsData) ? itemsData : [];
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Inventory Items</CardTitle>
+			</CardHeader>
+
+			<CardContent>
+				{items.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						Added inventory items will show up here
+					</p>
+				) : (
+					<div className="overflow-x-auto">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Ingredient Name</TableHead>
+									<TableHead>Quantity</TableHead>
+									<TableHead>Creation Date</TableHead>
+									<TableHead>Expiration Date</TableHead>
+									<TableHead>Actions</TableHead>
+								</TableRow>
+							</TableHeader>
+
+							<TableBody>
+								{items.map((item) => (
+									<InventoryItemList
+										key={`${item.inventory_id}-${item.inventory_item_id}`}
+										inventoryId={inventoryId}
+										item={item}
+									/>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
+function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
+	const addInventoryItem = useAddInventoryItem();
+
+	const today = useMemo(() => dateFromToday(0), []);
+	const nextWeek = useMemo(() => dateFromToday(7), []);
+
+	const [ingredientName, setIngredientName] = useState("");
+	const [quantity, setQuantity] = useState(0);
+	const [creationDate, setCreationDate] = useState(today);
+	const [expirationDate, setExpirationDate] = useState(nextWeek);
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Add Inventory Item</CardTitle>
+			</CardHeader>
+
+			<CardContent className="grid gap-4 md:grid-cols-4">
+				<div className="grid gap-2">
+					<Label htmlFor="ingredient_name">Ingredient Name</Label>
+					<Input
+						id="ingredient_name"
+						value={ingredientName}
+						onChange={(e) => setIngredientName(e.target.value)}
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="quantity">Quantity</Label>
+					<Input
+						id="quantity"
+						type="number"
+						min={0}
+						value={quantity}
+						onChange={(e) => {
+							const value = e.currentTarget.valueAsNumber;
+							setQuantity(Math.max(0, Number.isNaN(value) ? 0 : value));
+						}}
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="creation_date">Creation Date</Label>
+					<Input
+						id="creation_date"
+						type="date"
+						value={creationDate}
+						onChange={(e) => setCreationDate(e.target.value)}
+					/>
+				</div>
+
+				<div className="grid gap-2">
+					<Label htmlFor="expiration_date">Expiration Date</Label>
+					<Input
+						id="expiration_date"
+						type="date"
+						value={expirationDate}
+						onChange={(e) => setExpirationDate(e.target.value)}
+					/>
+				</div>
+
+				<div className="md:col-span-4">
+					<Button
+						onClick={() => {
+							const trimmedIngredientName = ingredientName.trim();
+
+							addInventoryItem.mutate(
+								{
+									inventoryId,
+									item: {
+										ingredient_name: trimmedIngredientName,
+										quantity,
+										creation_date: creationDate,
+										expiration_date: expirationDate || null,
+										receipt_id: null,
+									},
+								},
+								{
+									onSuccess: () => {
+										setIngredientName("");
+										setQuantity(0);
+										setCreationDate(today);
+										setExpirationDate(nextWeek);
+									},
+								},
+							);
+						}}
+					>
+						Add Inventory Item
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
 
 export function InventoryDetail() {
 	const { inventoryId } = useParams();
 
-	return <div>{inventoryId}</div>;
+	if (!inventoryId) {
+		return <div>Oops.. Inventory not found</div>;
+	}
+
+	return (
+		<div className="max-w-7xl space-y-6">
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-3xl font-bold tracking-tight">
+						Inventory Detail
+					</h1>
+					<p className="mt-1 text-muted-foreground">
+						Inventory ID: {inventoryId}
+					</p>
+				</div>
+
+				<Button asChild variant="outline">
+					<Link to="/inventories">Back to Inventories</Link>
+				</Button>
+			</div>
+
+			<InventoryItemsList inventoryId={inventoryId} />
+			<AddInventoryItemCard inventoryId={inventoryId} />
+		</div>
+	);
 }
