@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { Layout } from "./components/layout";
 import { CommunityPost } from "./pages/community-post";
-import { Demo } from "./pages/demo";
+import { Ingredients } from "./pages/ingredients";
 import { Inventories } from "./pages/inventories";
 import { InventoryDetail } from "./pages/inventory-detail";
 import { Login } from "./pages/login";
@@ -10,7 +10,7 @@ import { Recipes } from "./pages/recipes";
 import SettingsPage from "./pages/settings";
 
 function IndexRedirect() {
-	return <Navigate to="/demo" replace />;
+	return <Navigate to="/login" replace />;
 }
 
 export const router = createBrowserRouter([
@@ -23,8 +23,8 @@ export const router = createBrowserRouter([
 				Component: IndexRedirect,
 			},
 			{
-				path: "demo",
-				Component: Demo,
+				path: "ingredients",
+				Component: Ingredients,
 			},
 			{
 				path: "login",

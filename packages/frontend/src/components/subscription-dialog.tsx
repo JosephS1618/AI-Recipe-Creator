@@ -40,8 +40,8 @@ export function SubscriptionDialog({
 				onSuccess: (user) => {
 					saveCurrentUser(user);
 					onSuccess?.();
-					// Redirect to demo after successful subscription
-					navigate("/demo");
+					// Redirect to login after successful subscription
+					navigate("/login");
 				},
 			},
 		);

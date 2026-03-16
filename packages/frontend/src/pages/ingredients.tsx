@@ -244,13 +244,11 @@ function AddIngredient() {
 	);
 }
 
-export function Demo() {
+export function Ingredients() {
 	return (
-		<main className="min-h-screen bg-background p-6 text-foreground">
-			<div className="mx-auto flex max-w-5xl flex-col gap-6">
-				<IngredientsList />
-				<AddIngredient />
-			</div>
-		</main>
+		<div className="mx-auto flex max-w-5xl flex-col gap-6">
+			<IngredientsList />
+			<AddIngredient />
+		</div>
 	);
 }

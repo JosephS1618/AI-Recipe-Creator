@@ -28,9 +28,9 @@ export const navigationItems: NavigationItem[] = [
 		to: "/login",
 	},
 	{
-		title: "Demo",
+		title: "Ingredients",
 		icon: LayoutDashboard,
-		to: "/demo",
+		to: "/ingredients",
 	},
 	{
 		title: "Inventories",
