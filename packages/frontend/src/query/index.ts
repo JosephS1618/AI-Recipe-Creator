@@ -9,3 +9,5 @@ export * from "./inventoryItems.types";
 export * from "./session.utils";
 export * from "./subscription.query";
 export type * from "./subscription.types";
+export * from "./uploads.query";
+export type * from "./uploads.types";

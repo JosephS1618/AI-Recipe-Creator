@@ -14,6 +14,8 @@ import { ApiExceptionFilter } from "./response/api-exception.filter";
 import { ApiResponseInterceptor } from "./response/api-response.interceptor";
 import { SubscriptionController } from "./subscription.controller";
 import { SubscriptionService } from "./subscription.service";
+import { UploadsController } from "./uploads.controller";
+import { UploadsService } from "./uploads.service";
 
 @Module({
 	imports: [],
@@ -23,6 +25,7 @@ import { SubscriptionService } from "./subscription.service";
 		InventoriesController,
 		InventoryItemsController,
 		SubscriptionController,
+		UploadsController,
 	],
 	providers: [
 		{ provide: APP_PIPE, useClass: ZodValidationPipe },
@@ -34,6 +37,7 @@ import { SubscriptionService } from "./subscription.service";
 		InventoriesService,
 		InventoryItemsService,
 		SubscriptionService,
+		UploadsService,
 	],
 })
 export class AppModule {}

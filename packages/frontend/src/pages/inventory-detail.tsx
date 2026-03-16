@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { UploadButton } from "@/components/upload-button";
 import {
 	type DeleteInventoryItem,
 	type InventoryItem,
@@ -287,9 +289,18 @@ export function InventoryDetail() {
 					</p>
 				</div>
 
-				<Button asChild variant="outline">
-					<Link to="/inventories">Back to Inventories</Link>
-				</Button>
+				<div className="flex items-center gap-2">
+					<UploadButton
+						text="Upload Receipt"
+						onUploaded={(fileName) => {
+							toast.success(`Receipt uploaded: ${fileName}`);
+						}}
+					/>
+
+					<Button asChild variant="outline">
+						<Link to="/inventories">Back to Inventories</Link>
+					</Button>
+				</div>
 			</div>
 
 			<InventoryItemsList inventoryId={inventoryId} />
