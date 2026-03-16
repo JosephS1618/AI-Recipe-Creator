@@ -38,6 +38,14 @@ chmod +x ./packages/scripts/db_setup.sh
 ./packages/scripts/db_setup.sh
 ```
 
+### Step 4: Environment Setup
+
+Create a `.env` file in the root directory of the project. You can use the `.env.example` file as a template.
+
+```bash
+cp .env.example .env
+```
+
 ## Running the project
 
 ### If you want to run frontend and backend at the same time

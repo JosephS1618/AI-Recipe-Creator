@@ -14,6 +14,7 @@ import {
 import {
 	type IngredientItem,
 	useAddIngredient,
+	useAddIngredientByAi,
 	useEditIngredient,
 	useFetchIngredients,
 	useRemoveIngredient,
@@ -156,6 +157,7 @@ function AddIngredient() {
 	const [carbs, setCarbs] = useState(0);
 	const [protein, setProtein] = useState(0);
 	const [fat, setFat] = useState(0);
+	const trimmedName = name.trim();
 
 	return (
 		<Card>
@@ -222,9 +224,10 @@ function AddIngredient() {
 
 				<div className="md:col-span-4">
 					<Button
+						disabled={!trimmedName || addIngredient.isPending}
 						onClick={() =>
 							addIngredient.mutate(
-								{ name, carbs, protein, fat },
+								{ name: trimmedName, carbs, protein, fat },
 								{
 									onSuccess: () => {
 										setName("");
@@ -236,7 +239,53 @@ function AddIngredient() {
 							)
 						}
 					>
-						Add Ingredient
+						{addIngredient.isPending ? "Adding..." : "Add Ingredient"}
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function AddIngredientByAi() {
+	const addIngredientByAi = useAddIngredientByAi();
+	const [name, setName] = useState("");
+	const trimmedName = name.trim();
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Add Ingredient By AI</CardTitle>
+			</CardHeader>
+
+			<CardContent className="grid gap-4 md:grid-cols-4">
+				<div className="grid gap-2">
+					<Label htmlFor="ai-name">Ingredient Name</Label>
+					<Input
+						id="ai-name"
+						name="ai-name"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+					/>
+				</div>
+
+				<div className="flex items-end">
+					<Button
+						disabled={!trimmedName || addIngredientByAi.isPending}
+						onClick={() =>
+							addIngredientByAi.mutate(
+								{ name: trimmedName },
+								{
+									onSuccess: () => {
+										setName("");
+									},
+								},
+							)
+						}
+					>
+						{addIngredientByAi.isPending
+							? "Generating..."
+							: "Add Ingredient By AI"}
 					</Button>
 				</div>
 			</CardContent>
@@ -249,6 +298,7 @@ export function Ingredients() {
 		<div className="mx-auto flex max-w-5xl flex-col gap-6">
 			<IngredientsList />
 			<AddIngredient />
+			<AddIngredientByAi />
 		</div>
 	);
 }

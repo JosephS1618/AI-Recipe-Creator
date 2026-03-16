@@ -4,3 +4,5 @@ export type IngredientItem = {
 	protein: number;
 	fat: number;
 };
+
+export type IngredientNameInput = Pick<IngredientItem, "name">;

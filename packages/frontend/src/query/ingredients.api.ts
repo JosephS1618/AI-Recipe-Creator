@@ -1,4 +1,4 @@
-import type { IngredientItem } from "./ingredients.types";
+import type { IngredientItem, IngredientNameInput } from "./ingredients.types";
 import { type ApiResponse, apiClient } from "./request.utils";
 
 export async function getIngredients(): Promise<IngredientItem[]> {
@@ -15,6 +15,16 @@ export async function addIngredient(item: IngredientItem): Promise<void> {
 	return response.data.data;
 }
 
+export async function addIngredientByAi(
+	item: IngredientNameInput,
+): Promise<IngredientItem> {
+	const response = await apiClient.post<ApiResponse<IngredientItem>>(
+		"/ingredients/add-by-ai",
+		item,
+	);
+	return response.data.data;
+}
+
 export async function editIngredient(item: IngredientItem): Promise<void> {
 	const response = await apiClient.post<ApiResponse<void>>(
 		"/ingredients/edit",
@@ -24,7 +34,7 @@ export async function editIngredient(item: IngredientItem): Promise<void> {
 }
 
 export async function removeIngredient(
-	item: Pick<IngredientItem, "name">,
+	item: IngredientNameInput,
 ): Promise<void> {
 	const response = await apiClient.post<ApiResponse<void>>(
 		"/ingredients/remove",

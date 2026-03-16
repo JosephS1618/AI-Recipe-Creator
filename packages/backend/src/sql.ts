@@ -1,3 +1,4 @@
+import "./env";
 import postgres from "postgres";
 
 const DATABASE_URL =

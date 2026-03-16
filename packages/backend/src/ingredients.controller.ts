@@ -21,6 +21,11 @@ export class IngredientController {
 		await this.service.add(item);
 	}
 
+	@Post("/add-by-ai")
+	async addByAi(@Body() item: IngredientNameDto): Promise<IngredientItem> {
+		return this.service.addByAi(item);
+	}
+
 	@Post("/remove")
 	async remove(@Body() item: IngredientNameDto): Promise<void> {
 		await this.service.remove(item);
