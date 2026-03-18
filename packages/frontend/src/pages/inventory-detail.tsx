@@ -322,10 +322,8 @@ export function InventoryDetail() {
 											{ id: receiptToastId },
 										);
 									},
-									onError: (error) => {
-										toast.error(error.message, {
-											id: receiptToastId,
-										});
+									onError: () => {
+										toast.dismiss(receiptToastId);
 									},
 								},
 							);

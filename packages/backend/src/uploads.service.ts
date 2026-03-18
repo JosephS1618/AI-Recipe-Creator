@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
@@ -21,11 +22,14 @@ export class UploadsService {
 	private readonly uploadsDir = resolve(__dirname, "..", "uploads");
 
 	async saveFile(file: UploadedFilePayload): Promise<UploadedFileInfo> {
-		const fileName = `${randomUUID()}${extname(file.originalname)}`;
+		const fileName = this.createFileName(file);
 		const targetPath = join(this.uploadsDir, fileName);
 
 		await mkdir(this.uploadsDir, { recursive: true });
-		await writeFile(targetPath, file.buffer);
+
+		if (!existsSync(targetPath)) {
+			await writeFile(targetPath, file.buffer);
+		}
 
 		return { fileName };
 	}
@@ -38,5 +42,12 @@ export class UploadsService {
 			fileName,
 			buffer,
 		};
+	}
+
+	private createFileName(file: UploadedFilePayload): string {
+		const hash = createHash("sha256").update(file.buffer).digest("hex");
+		const extension = extname(file.originalname).toLowerCase();
+
+		return `${hash}${extension}`;
 	}
 }

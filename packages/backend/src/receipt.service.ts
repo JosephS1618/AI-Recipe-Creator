@@ -74,6 +74,7 @@ export class ReceiptService {
 			accountId,
 			inventoryId,
 		);
+		await this.ensureReceiptNotProcessed(fileName);
 
 		const parsedReceipt = await this.parseReceipt(fileName);
 
@@ -116,16 +117,6 @@ export class ReceiptService {
 		fileName: string;
 		ocrResult: string;
 	}): Promise<string> {
-		const [existingReceipt] = await sql<{ receiptId: string }[]>`
-			SELECT ReceiptID AS "receiptId"
-			FROM Receipt
-			WHERE ImageFilePath = ${fileName};
-		`;
-
-		if (existingReceipt) {
-			throw new BadRequestException("This receipt has already been processed");
-		}
-
 		const [receipt] = await sql<{ receiptId: string }[]>`
 			INSERT INTO Receipt (
 				ReceiptID,
@@ -149,6 +140,18 @@ export class ReceiptService {
 		}
 
 		return receipt.receiptId;
+	}
+
+	private async ensureReceiptNotProcessed(fileName: string): Promise<void> {
+		const [existingReceipt] = await sql<{ receiptId: string }[]>`
+			SELECT ReceiptID AS "receiptId"
+			FROM Receipt
+			WHERE ImageFilePath = ${fileName};
+		`;
+
+		if (existingReceipt) {
+			throw new BadRequestException("This receipt has already been processed");
+		}
 	}
 
 	private async addManyFromReceipt(
