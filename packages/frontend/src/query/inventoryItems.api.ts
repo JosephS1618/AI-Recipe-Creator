@@ -1,5 +1,7 @@
 import type {
 	CreateInventoryItem,
+	CreateInventoryItemsFromReceiptInput,
+	CreateInventoryItemsFromReceiptResult,
 	DeleteInventoryItem,
 	InventoryItem,
 } from "./inventoryItems.types";
@@ -24,6 +26,17 @@ export async function addInventoryItem(
 		`/inventory/${inventoryId}/items/create`,
 		item,
 	);
+
+	return response.data.data;
+}
+
+export async function addInventoryItemsFromReceipt(
+	inventoryId: string,
+	input: CreateInventoryItemsFromReceiptInput,
+): Promise<CreateInventoryItemsFromReceiptResult> {
+	const response = await apiClient.post<
+		ApiResponse<CreateInventoryItemsFromReceiptResult>
+	>(`/inventory/${inventoryId}/items/create-from-receipt`, input);
 
 	return response.data.data;
 }

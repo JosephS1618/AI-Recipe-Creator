@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { createZodDto } from "nestjs-zod";
 import { z } from "zod";
 
@@ -104,7 +104,7 @@ export class InventoriesService {
 		`;
 	}
 
-	private async verifyInventoryOwnership(
+	async verifyInventoryOwnership(
 		accountId: string,
 		inventoryId: string,
 	): Promise<void> {
@@ -115,7 +115,7 @@ export class InventoriesService {
 		`;
 
 		if (result.length === 0 || parseInt(result[0].count, 10) === 0) {
-			throw new Error("Inventory not found or access denied");
+			throw new NotFoundException("Inventory not found or access denied");
 		}
 	}
 

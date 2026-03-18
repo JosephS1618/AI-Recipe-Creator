@@ -20,3 +20,13 @@ export type DeleteInventoryItem = {
 	inventory_item_id: number;
 	inventory_id: string;
 };
+
+export type CreateInventoryItemsFromReceiptInput = {
+	fileName: string;
+};
+
+export type CreateInventoryItemsFromReceiptResult = {
+	receiptId: string;
+	createdItems: InventoryItem[];
+	createdIngredientNames: string[];
+};

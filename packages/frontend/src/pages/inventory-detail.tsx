@@ -18,6 +18,7 @@ import {
 	type DeleteInventoryItem,
 	type InventoryItem,
 	useAddInventoryItem,
+	useAddInventoryItemsFromReceipt,
 	useEditInventoryItem,
 	useGetInventoryItems,
 	useRemoveInventoryItem,
@@ -272,6 +273,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 
 export function InventoryDetail() {
 	const { inventoryId } = useParams();
+	const addInventoryItemsFromReceipt = useAddInventoryItemsFromReceipt();
 
 	if (!inventoryId) {
 		return <div>Oops.. Inventory not found</div>;
@@ -292,8 +294,41 @@ export function InventoryDetail() {
 				<div className="flex items-center gap-2">
 					<UploadButton
 						text="Upload Receipt"
+						disabled={addInventoryItemsFromReceipt.isPending}
 						onUploaded={(fileName) => {
-							toast.success(`Receipt uploaded: ${fileName}`);
+							const receiptToastId = toast.loading(
+								"Receipt uploaded. Parsing receipt...",
+							);
+
+							addInventoryItemsFromReceipt.mutate(
+								{
+									inventoryId,
+									input: { fileName },
+								},
+								{
+									onSuccess: ({ createdItems, createdIngredientNames }) => {
+										const itemCount = createdItems.length;
+										const ingredientSummary =
+											createdIngredientNames.length > 0
+												? ` Created ${createdIngredientNames.length} new ingredient${
+														createdIngredientNames.length === 1 ? "" : "s"
+													}: ${createdIngredientNames.join(", ")}.`
+												: "";
+
+										toast.success(
+											`Added ${itemCount} inventory item${
+												itemCount === 1 ? "" : "s"
+											} from receipt.${ingredientSummary}`,
+											{ id: receiptToastId },
+										);
+									},
+									onError: (error) => {
+										toast.error(error.message, {
+											id: receiptToastId,
+										});
+									},
+								},
+							);
 						}}
 					/>
 
@@ -304,6 +339,11 @@ export function InventoryDetail() {
 			</div>
 
 			<InventoryItemsList inventoryId={inventoryId} />
+			{addInventoryItemsFromReceipt.isPending && (
+				<p className="text-sm text-muted-foreground">
+					Parsing receipt and adding inventory items...
+				</p>
+			)}
 			<AddInventoryItemCard inventoryId={inventoryId} />
 		</div>
 	);

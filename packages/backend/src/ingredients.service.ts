@@ -8,29 +8,44 @@ import { createZodDto } from "nestjs-zod";
 import { z } from "zod";
 
 import { ai, model } from "./ai";
+import { NormalizedNameMap } from "./ingredients.utils";
 import { sql } from "./sql";
 
 const NutrientValueSchema = z
 	.number()
 	.max(100)
-	.nonnegative()
+	.min(0)
 	.transform((value) => Math.round(value * 100) / 100);
 
+const IngredientItemNameSchema = z
+	.string()
+	.trim()
+	.min(1, "Ingredient name is required");
+
 export const IngredientItemSchema = z.object({
-	name: z.string().trim().min(1, "Ingredient name is required"),
+	name: IngredientItemNameSchema,
 	carbs: NutrientValueSchema,
 	protein: NutrientValueSchema,
 	fat: NutrientValueSchema,
 });
-export const IngredientNameSchema = IngredientItemSchema.pick({
-	name: true,
+export const IngredientNameSchema = z.object({
+	name: IngredientItemNameSchema,
 });
-const IngredientNutritionSchema = IngredientItemSchema.omit({
-	name: true,
-}).strict();
+export const IngredientNamesSchema = z.object({
+	names: z
+		.array(IngredientItemNameSchema)
+		.min(1, "At least one ingredient name is required"),
+});
+const IngredientNutritionBatchSchema = z
+	.object({
+		ingredients: z.array(IngredientItemSchema).min(1),
+	})
+	.strict();
 export type IngredientItem = z.infer<typeof IngredientItemSchema>;
+export type IngredientNames = z.infer<typeof IngredientNamesSchema>;
 export class IngredientItemDto extends createZodDto(IngredientItemSchema) {}
 export class IngredientNameDto extends createZodDto(IngredientNameSchema) {}
+export class IngredientNamesDto extends createZodDto(IngredientNamesSchema) {}
 
 @Injectable()
 export class IngredientService {
@@ -66,53 +81,124 @@ export class IngredientService {
 	}
 
 	async addByAi(item: Pick<IngredientItem, "name">): Promise<IngredientItem> {
-		const name = item.name.trim();
+		const [ingredient] = await this.addManyByAi({ names: [item.name] });
 
-		if (!name) {
-			throw new BadRequestException("Ingredient name is required");
+		if (!ingredient) {
+			throw new InternalServerErrorException(
+				"Gemini did not return an ingredient",
+			);
 		}
 
-		const nutrition = await this.generateNutritionByAi(name);
-		const ingredient: IngredientItem = {
-			name,
-			...nutrition,
-		};
-
-		await this.add(ingredient);
 		return ingredient;
 	}
 
+	async addMissingIngredientsByAi(names: string[]): Promise<{
+		createdIngredients: IngredientItem[];
+		resolvedNames: string[];
+	}> {
+		const requestedNames = NormalizedNameMap.uniqueNames(names);
+
+		if (requestedNames.length === 0) {
+			throw new BadRequestException("Ingredient name is required");
+		}
+
+		const existingIngredientNames = NormalizedNameMap.fromItems(
+			await this.list(),
+			(ingredient) => ingredient.name,
+			(ingredient) => ingredient.name,
+		);
+		const createdIngredients = await this.addManyByAi({
+			names: requestedNames.filter(
+				(name) => !existingIngredientNames.has(name),
+			),
+		});
+		const resolvedIngredientNames = existingIngredientNames.clone();
+
+		for (const ingredient of createdIngredients) {
+			resolvedIngredientNames.set(ingredient.name, ingredient.name);
+		}
+
+		return {
+			createdIngredients,
+			resolvedNames: requestedNames.map((name) => {
+				const resolvedName = resolvedIngredientNames.get(name);
+
+				if (!resolvedName) {
+					throw new InternalServerErrorException(
+						`Failed to resolve ingredient "${name}"`,
+					);
+				}
+
+				return resolvedName;
+			}),
+		};
+	}
+
+	private async addManyByAi({
+		names,
+	}: IngredientNames): Promise<IngredientItem[]> {
+		const ingredients = await this.generateNutritionByAi(names);
+
+		for (const ingredient of ingredients) {
+			await this.add(ingredient);
+		}
+
+		return ingredients;
+	}
+
 	private async generateNutritionByAi(
-		name: string,
-	): Promise<Omit<IngredientItem, "name">> {
+		names: string[],
+	): Promise<IngredientItem[]> {
 		try {
+			const uniqueNames = NormalizedNameMap.uniqueNames(names);
+
+			if (uniqueNames.length === 0) {
+				return [];
+			}
+
 			const response = await ai.models.generateContent({
 				model,
 				contents: [
-					`Estimate the nutrition values for the ingredient "${name}".`,
-					"Return grams of carbs, protein, and fat per 100 g of the ingredient.",
-					"Return JSON only with numeric fields carbs, protein, and fat.",
+					"Estimate the nutrition values for each ingredient in this list:",
+					...uniqueNames.map((name) => `- ${name}`),
+					"Return grams of carbs, protein, and fat per 100 g of each ingredient.",
+					'Use the exact provided ingredient name in each "name" field.',
+					'Return JSON only with an "ingredients" array.',
 				].join("\n"),
 				config: {
 					responseMimeType: "application/json",
 					responseSchema: {
 						type: Type.OBJECT,
-						required: ["carbs", "protein", "fat"],
+						required: ["ingredients"],
 						properties: {
-							carbs: {
-								type: Type.NUMBER,
-								description: "Estimated grams of carbohydrates.",
-								minimum: 0,
-							},
-							protein: {
-								type: Type.NUMBER,
-								description: "Estimated grams of protein.",
-								minimum: 0,
-							},
-							fat: {
-								type: Type.NUMBER,
-								description: "Estimated grams of fat.",
-								minimum: 0,
+							ingredients: {
+								type: Type.ARRAY,
+								items: {
+									type: Type.OBJECT,
+									required: ["name", "carbs", "protein", "fat"],
+									properties: {
+										name: {
+											type: Type.STRING,
+											description:
+												"Ingredient name copied exactly from the prompt.",
+										},
+										carbs: {
+											type: Type.NUMBER,
+											description: "Estimated grams of carbohydrates.",
+											minimum: 0,
+										},
+										protein: {
+											type: Type.NUMBER,
+											description: "Estimated grams of protein.",
+											minimum: 0,
+										},
+										fat: {
+											type: Type.NUMBER,
+											description: "Estimated grams of fat.",
+											minimum: 0,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -124,7 +210,7 @@ export class IngredientService {
 			}
 
 			const parsed = JSON.parse(response.text);
-			const result = IngredientNutritionSchema.safeParse(parsed);
+			const result = IngredientNutritionBatchSchema.safeParse(parsed);
 
 			if (!result.success) {
 				throw new Error(
@@ -132,7 +218,28 @@ export class IngredientService {
 				);
 			}
 
-			return result.data;
+			const ingredientByName = NormalizedNameMap.fromItems(
+				result.data.ingredients,
+				(ingredient) => ingredient.name,
+				(ingredient) => ingredient,
+			);
+
+			return names.map((name) => {
+				const matchedIngredient = ingredientByName.get(name);
+
+				if (!matchedIngredient) {
+					throw new Error(
+						`Gemini did not return nutrition values for "${name}"`,
+					);
+				}
+
+				return {
+					name,
+					carbs: matchedIngredient.carbs,
+					protein: matchedIngredient.protein,
+					fat: matchedIngredient.fat,
+				};
+			});
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unknown Gemini error";

@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
 
 export type UploadedFileInfo = {
 	fileName: string;
+};
+
+export type UploadedFileData = UploadedFileInfo & {
+	buffer: Buffer;
 };
 
 type UploadedFilePayload = {
@@ -24,5 +28,15 @@ export class UploadsService {
 		await writeFile(targetPath, file.buffer);
 
 		return { fileName };
+	}
+
+	async readFile(fileName: string): Promise<UploadedFileData> {
+		const targetPath = join(this.uploadsDir, fileName);
+		const buffer = await readFile(targetPath);
+
+		return {
+			fileName,
+			buffer,
+		};
 	}
 }

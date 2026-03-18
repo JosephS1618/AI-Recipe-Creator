@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
 	addInventoryItem,
+	addInventoryItemsFromReceipt,
 	deleteInventoryItem,
 	getInventoryItems,
 	updateInventoryItem,
@@ -9,6 +10,8 @@ import {
 
 import type {
 	CreateInventoryItem,
+	CreateInventoryItemsFromReceiptInput,
+	CreateInventoryItemsFromReceiptResult,
 	DeleteInventoryItem,
 	InventoryItem,
 } from "./inventoryItems.types";
@@ -32,6 +35,29 @@ export const useAddInventoryItem = () => {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: ["inventoryItems", variables.inventoryId],
+			});
+		},
+	});
+
+	return mutation;
+};
+
+export const useAddInventoryItemsFromReceipt = () => {
+	const queryClient = useQueryClient();
+
+	const mutation = useMutation<
+		CreateInventoryItemsFromReceiptResult,
+		Error,
+		{ inventoryId: string; input: CreateInventoryItemsFromReceiptInput }
+	>({
+		mutationFn: ({ inventoryId, input }) =>
+			addInventoryItemsFromReceipt(inventoryId, input),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["inventoryItems", variables.inventoryId],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["ingredients"],
 			});
 		},
 	});

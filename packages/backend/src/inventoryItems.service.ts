@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import {
 	type CreateInventoryItem,
 	type DeleteInventoryItem,
@@ -25,7 +25,7 @@ export class InventoryItemsService {
 		`;
 	}
 
-	async add(item: CreateInventoryItem): Promise<void> {
+	async add(item: CreateInventoryItem): Promise<InventoryItem> {
 		const [{ max_item_id }] = await sql<{ max_item_id: number }[]>`
 			SELECT COALESCE(MAX(InventoryItemID), 0) AS max_item_id
 			FROM InventoryItem
@@ -34,7 +34,7 @@ export class InventoryItemsService {
 
 		const new_inventory_item_id = max_item_id + 1;
 
-		await sql`
+		const [createdItem] = await sql<InventoryItem[]>`
 			INSERT INTO InventoryItem (
 				InventoryItemID,
 				InventoryID,
@@ -53,7 +53,21 @@ export class InventoryItemsService {
 				${item.ingredient_name},
 				${item.receipt_id}
 			)
+			RETURNING
+				InventoryItemID AS inventory_item_id,
+				InventoryID AS inventory_id,
+				Quantity AS quantity,
+				CreationDate AS creation_date,
+				ExpirationDate AS expiration_date,
+				IngredientName AS ingredient_name,
+				ReceiptID AS receipt_id;
 		`;
+
+		if (!createdItem) {
+			throw new InternalServerErrorException("Failed to create inventory item");
+		}
+
+		return createdItem;
 	}
 
 	async remove(item: DeleteInventoryItem): Promise<void> {

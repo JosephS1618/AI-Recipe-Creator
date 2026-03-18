@@ -1,20 +1,28 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 
+import { CurrentAccountId } from "./decorators/current-account-id";
 import {
 	CreateInventoryItemDto,
 	DeleteInventoryItemDto,
 	EditInventoryItemDto,
 } from "./inventoryItems.dto";
-
 import { InventoryItemsService } from "./inventoryItems.service";
+import {
+	CreateReceiptDto,
+	type CreateReceiptResult,
+	ReceiptService,
+} from "./receipt.service";
 
 @Controller("inventory/:inventoryId/items")
 export class InventoryItemsController {
-	constructor(private readonly service: InventoryItemsService) {}
+	constructor(
+		private readonly receiptService: ReceiptService,
+		private readonly inventoryItemsService: InventoryItemsService,
+	) {}
 
 	@Get()
 	async list(@Param("inventoryId") inventoryId: string) {
-		return this.service.list(inventoryId);
+		return this.inventoryItemsService.list(inventoryId);
 	}
 
 	@Post("create")
@@ -22,10 +30,23 @@ export class InventoryItemsController {
 		@Param("inventoryId") inventoryId: string,
 		@Body() item: CreateInventoryItemDto,
 	) {
-		await this.service.add({
+		await this.inventoryItemsService.add({
 			...item,
 			inventory_id: inventoryId,
 		});
+	}
+
+	@Post("create-from-receipt")
+	async addFromReceipt(
+		@CurrentAccountId() accountId: string,
+		@Param("inventoryId") inventoryId: string,
+		@Body() input: CreateReceiptDto,
+	): Promise<CreateReceiptResult> {
+		return this.receiptService.addFromReceipt(
+			accountId,
+			inventoryId,
+			input.fileName,
+		);
 	}
 
 	@Post("delete")
@@ -33,7 +54,7 @@ export class InventoryItemsController {
 		@Param("inventoryId") inventoryId: string,
 		@Body() item: DeleteInventoryItemDto,
 	) {
-		await this.service.remove({
+		await this.inventoryItemsService.remove({
 			...item,
 			inventory_id: inventoryId,
 		});
@@ -44,7 +65,7 @@ export class InventoryItemsController {
 		@Param("inventoryId") inventoryId: string,
 		@Body() item: EditInventoryItemDto,
 	) {
-		await this.service.edit({
+		await this.inventoryItemsService.edit({
 			...item,
 			inventory_id: inventoryId,
 		});

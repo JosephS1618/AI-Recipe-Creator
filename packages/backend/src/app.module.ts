@@ -10,6 +10,7 @@ import { InventoriesController } from "./inventories.controller";
 import { InventoriesService } from "./inventories.service";
 import { InventoryItemsController } from "./inventoryItems.controller";
 import { InventoryItemsService } from "./inventoryItems.service";
+import { ReceiptService } from "./receipt.service";
 import { ApiExceptionFilter } from "./response/api-exception.filter";
 import { ApiResponseInterceptor } from "./response/api-response.interceptor";
 import { SubscriptionController } from "./subscription.controller";
@@ -35,6 +36,7 @@ import { UploadsService } from "./uploads.service";
 		AuthService,
 		IngredientService,
 		InventoriesService,
+		ReceiptService,
 		InventoryItemsService,
 		SubscriptionService,
 		UploadsService,
