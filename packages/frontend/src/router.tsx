@@ -5,6 +5,7 @@ import { Ingredients } from "./pages/ingredients";
 import { Inventories } from "./pages/inventories";
 import { InventoryDetail } from "./pages/inventory-detail";
 import { Login } from "./pages/login";
+import { RecipeDetailPage } from "./pages/recipe-detail";
 import { RecipeNotes } from "./pages/recipe-notes";
 import { Recipes } from "./pages/recipes";
 import SettingsPage from "./pages/settings";
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
 			{
 				path: "recipes",
 				Component: Recipes,
+			},
+			{
+				path: "recipes/:recipeId",
+				Component: RecipeDetailPage,
 			},
 			{
 				path: "community-post",
