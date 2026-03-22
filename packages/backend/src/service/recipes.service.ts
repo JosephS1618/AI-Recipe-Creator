@@ -10,22 +10,27 @@ import type {
 @Injectable()
 export class RecipesService {
 	async list(): Promise<RecipeItem[]> {
-		throw new Error("Need to Implement");
+		throw new Error("Not implemented");
 	}
 
 	async get(recipe_id: string): Promise<Recipe> {
-		throw new Error("Need to Implement");
+		void recipe_id;
+		throw new Error("Not implemented");
 	}
 
 	async create(recipe: CreateRecipe): Promise<Recipe> {
-		throw new Error("Need to Implement");
+		void recipe;
+		throw new Error("Not implemented");
 	}
 
 	async update(recipe: UpdateRecipe): Promise<Recipe> {
-		throw new Error("Need to Implement");
+		void recipe;
+		throw new Error("Not implemented");
 	}
 
 	async remove(recipe_id: string, account_id: string): Promise<void> {
-		throw new Error("Need to Implement");
+		void recipe_id;
+		void account_id;
+		throw new Error("Not implemented");
 	}
 }
