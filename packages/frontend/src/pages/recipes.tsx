@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { RecipeDialog } from "@/components/recipe-dialog";
@@ -53,24 +53,26 @@ export function Recipes() {
 	const { data: recipes = [] } = useGetRecipes();
 	const createRecipe = useCreateRecipe();
 
+	const sortedRecipes = useMemo(() => {
+		return [...recipes].sort((a, b) =>
+			a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+		);
+	}, [recipes]);
+
 	const handleSubmit = (data: CreateRecipeInput) => {
 		if (!data.name.trim()) {
-			toast.error("Name required");
+			toast.error("Please add name");
 			return;
 		}
 
 		if (data.ingredients.length === 0) {
-			toast.error("Add at least 1 ingredient");
+			toast.error("Please add at least 1 ingredient");
 			return;
 		}
 
 		createRecipe.mutate(data, {
 			onSuccess: () => {
-				toast.success("Created");
 				setOpen(false);
-			},
-			onError: (e) => {
-				toast.error(e.message);
 			},
 		});
 	};
@@ -102,19 +104,15 @@ export function Recipes() {
 						</TableHeader>
 
 						<TableBody>
-							{recipes.map((r) => (
-								<Row key={r.recipe_id} recipe={r} />
+							{sortedRecipes.map((recipe) => (
+								<Row key={recipe.recipe_id} recipe={recipe} />
 							))}
 						</TableBody>
 					</Table>
 				</CardContent>
 			</Card>
 
-			<RecipeDialog
-				isOpen={open}
-				onOpenChange={setOpen}
-				onSubmit={handleSubmit}
-			/>
+			<RecipeDialog open={open} toggleOpen={setOpen} onSubmit={handleSubmit} />
 		</div>
 	);
 }

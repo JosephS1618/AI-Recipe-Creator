@@ -12,7 +12,7 @@ import type {
 
 @Injectable()
 export class RecipesService {
-	async list(account_id: string): Promise<RecipeItem[]> {
+	async list(): Promise<RecipeItem[]> {
 		return sql<RecipeItem[]>`
 			SELECT
 				RecipeID AS recipe_id,
@@ -24,12 +24,11 @@ export class RecipesService {
 				CreationDate AS creation_date,
 				ModificationDate AS modification_date
 			FROM Recipe
-			WHERE AccountID = ${account_id}
-			ORDER BY ModificationDate DESC, CreationDate DESC;
+			ORDER BY Name ASC;
 		`;
 	}
 
-	async get(recipe_id: string, account_id: string): Promise<Recipe> {
+	async get(recipe_id: string): Promise<Recipe> {
 		const [recipe] = await sql<Recipe[]>`
 			SELECT
 				RecipeID AS recipe_id,
@@ -42,7 +41,7 @@ export class RecipesService {
 				CreationDate AS creation_date,
 				ModificationDate AS modification_date
 			FROM Recipe
-			WHERE RecipeID = ${recipe_id} AND AccountID = ${account_id};
+			WHERE RecipeID = ${recipe_id};
 		`;
 
 		if (!recipe) {
@@ -107,7 +106,7 @@ export class RecipesService {
 			`;
 		}
 
-		return this.get(recipe_id, recipe.account_id);
+		return this.get(recipe_id);
 	}
 
 	async update(recipe: UpdateRecipe): Promise<Recipe> {
@@ -149,7 +148,7 @@ export class RecipesService {
 			`;
 		}
 
-		return this.get(recipe.recipe_id, recipe.account_id);
+		return this.get(recipe.recipe_id);
 	}
 
 	async remove(recipe_id: string, account_id: string): Promise<void> {

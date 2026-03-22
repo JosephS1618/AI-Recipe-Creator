@@ -32,20 +32,16 @@ export const RecipeItemSchema = z.object({
 	modification_date: z.string(),
 });
 
-export const UpdateRecipeSchema = RecipeBodySchema.extend({
-	recipe_id: z.string().uuid(),
-});
-
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
 export type RecipeBody = z.infer<typeof RecipeBodySchema>;
 export type Recipe = z.infer<typeof RecipeSchema>;
 export type RecipeItem = z.infer<typeof RecipeItemSchema>;
-export type UpdateRecipeBody = z.infer<typeof UpdateRecipeSchema>;
 
 export type CreateRecipe = RecipeBody & {
 	account_id: string;
 };
 
-export type UpdateRecipe = UpdateRecipeBody & {
+export type UpdateRecipe = RecipeBody & {
+	recipe_id: string;
 	account_id: string;
 };

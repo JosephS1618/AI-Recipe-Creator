@@ -9,8 +9,8 @@ export class RecipesController {
 	constructor(private readonly recipesService: RecipesService) {}
 
 	@Get("recipes")
-	list(@CurrentAccountId() accountId: string) {
-		return this.recipesService.list(accountId);
+	list() {
+		return this.recipesService.list();
 	}
 
 	@Post("recipe/create")
@@ -22,11 +22,8 @@ export class RecipesController {
 	}
 
 	@Get("recipe/:recipeId")
-	get(
-		@CurrentAccountId() accountId: string,
-		@Param("recipeId") recipeId: string,
-	) {
-		return this.recipesService.get(recipeId, accountId);
+	get(@Param("recipeId") recipeId: string) {
+		return this.recipesService.get(recipeId);
 	}
 
 	@Post("recipe/:recipeId/delete")

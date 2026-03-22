@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { toast } from "sonner";
+import { useAccountSession } from "@/components/account-provider";
+import { RecipeDialog } from "@/components/recipe-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +12,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useDeleteRecipe, useGetRecipe } from "@/query";
+import { useDeleteRecipe, useGetRecipe, useUpdateRecipe } from "@/query";
 
 function formatDate(value: string | null | undefined) {
 	return value ? value.slice(0, 10) : "—";
@@ -24,9 +26,18 @@ function formatCost(cost: number | null | undefined) {
 export function RecipeDetailPage() {
 	const { recipeId = "" } = useParams();
 	const navigate = useNavigate();
+	const { currentUser } = useAccountSession();
+
+	const [updateRecipeOpen, setUpdateRecipeOpen] = useState(false);
 
 	const { data: recipe } = useGetRecipe(recipeId);
 	const deleteRecipe = useDeleteRecipe();
+	const updateRecipe = useUpdateRecipe();
+
+	const isRecipeOwner =
+		Boolean(recipe) &&
+		Boolean(currentUser) &&
+		recipe?.account_id === currentUser?.accountId;
 
 	return (
 		<div className="max-w-6xl space-y-6">
@@ -43,23 +54,32 @@ export function RecipeDetailPage() {
 						<Link to="/recipes">Back to Recipes</Link>
 					</Button>
 
-					<Button
-						variant="outline"
-						className="text-destructive hover:text-destructive"
-						disabled={deleteRecipe.isPending}
-						onClick={() => {
-							if (!recipe?.recipe_id) return;
+					{isRecipeOwner && (
+						<>
+							<Button
+								variant="outline"
+								onClick={() => setUpdateRecipeOpen(true)}
+							>
+								Update
+							</Button>
 
-							deleteRecipe.mutate(recipe.recipe_id, {
-								onSuccess: () => {
-									toast.success("Recipe deleted");
-									navigate("/recipes");
-								},
-							});
-						}}
-					>
-						{"Delete Recipe"}
-					</Button>
+							<Button
+								variant="outline"
+								className="text-destructive hover:text-destructive"
+								onClick={() => {
+									if (!recipe?.recipe_id) return;
+
+									deleteRecipe.mutate(recipe.recipe_id, {
+										onSuccess: () => {
+											navigate("/recipes");
+										},
+									});
+								}}
+							>
+								Delete
+							</Button>
+						</>
+					)}
 				</div>
 			</div>
 
@@ -74,7 +94,6 @@ export function RecipeDetailPage() {
 						<div className="font-medium">{recipe?.name}</div>
 					</div>
 
-					{/* STATS ROW */}
 					<div className="grid gap-4 grid-cols-2 md:grid-cols-5">
 						<div>
 							<div className="text-sm text-muted-foreground">Cost</div>
@@ -105,7 +124,7 @@ export function RecipeDetailPage() {
 					</div>
 
 					<div>
-						<div className="text-sm text-muted-foreground mb-2">
+						<div className="mb-2 text-sm text-muted-foreground">
 							Description
 						</div>
 						<div className="rounded-md border p-4 whitespace-pre-wrap break-words">
@@ -121,7 +140,7 @@ export function RecipeDetailPage() {
 				</CardHeader>
 
 				<CardContent>
-					{recipe?.ingredients.length === 0 ? (
+					{!recipe?.ingredients || recipe.ingredients.length === 0 ? (
 						<p className="text-sm text-muted-foreground">
 							Umm.. hmm no ingredients found
 						</p>
@@ -136,7 +155,7 @@ export function RecipeDetailPage() {
 								</TableHeader>
 
 								<TableBody>
-									{recipe?.ingredients.map((ingredient, index) => (
+									{recipe.ingredients.map((ingredient, index) => (
 										<TableRow key={`${ingredient.ingredient_name}-${index}`}>
 											<TableCell className="text-sm text-muted-foreground">
 												{ingredient.ingredient_name}
@@ -152,6 +171,38 @@ export function RecipeDetailPage() {
 					)}
 				</CardContent>
 			</Card>
+
+			{recipe && isRecipeOwner && (
+				<RecipeDialog
+					open={updateRecipeOpen}
+					toggleOpen={setUpdateRecipeOpen}
+					title="Update Recipe"
+					description="Reminder: Only ingredients already added to the ingredients table can be used in recipes"
+					submitLabel="Save"
+					initialValues={{
+						name: recipe.name,
+						content: recipe.content,
+						cuisine: recipe.cuisine,
+						time: recipe.time,
+						ingredients: recipe.ingredients,
+					}}
+					onSubmit={(data) => {
+						updateRecipe.mutate(
+							{
+								recipe_id: recipe.recipe_id,
+								name: data.name,
+								content: data.content,
+								cuisine: data.cuisine,
+								time: data.time,
+								ingredients: data.ingredients,
+							},
+							{
+								onSuccess: () => setUpdateRecipeOpen(false),
+							},
+						);
+					}}
+				/>
+			)}
 		</div>
 	);
 }
