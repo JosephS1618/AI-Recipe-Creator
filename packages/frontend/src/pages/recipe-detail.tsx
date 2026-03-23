@@ -106,9 +106,7 @@ export const RecipeDetailPage = () => {
 						<div className="mb-2 text-sm text-muted-foreground">
 							Description
 						</div>
-						<div className="whitespace-pre-wrap rounded-md border p-4">
-							{recipe?.content}
-						</div>
+						<div className="whitespace-pre-wrap">{recipe?.content}</div>
 					</div>
 				</CardContent>
 			</Card>
