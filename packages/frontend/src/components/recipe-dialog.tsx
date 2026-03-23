@@ -18,11 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	type Recipe,
-	type RecipeIngredient,
-	useFetchIngredients,
-} from "@/query";
+import { type RecipeIngredient, useFetchIngredients } from "@/query";
 
 type RecipeFormData = {
 	name: string;
@@ -38,7 +34,7 @@ type RecipeDialogProps = {
 	onSubmit: (data: RecipeFormData) => void;
 	title?: string;
 	submitLabel?: string;
-	passedValues?: Recipe | null;
+	passedValues?: RecipeFormData | null;
 };
 
 type IngredientRow = RecipeIngredient & {
