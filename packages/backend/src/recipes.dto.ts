@@ -4,7 +4,7 @@ import {
 	RecipeBodySchema,
 	RecipeItemSchema,
 	RecipeSchema,
-} from "../types/recipes.types";
+} from "./recipes.types";
 
 export class RecipeDto extends createZodDto(RecipeSchema) {}
 export class RecipeItemDto extends createZodDto(RecipeItemSchema) {}

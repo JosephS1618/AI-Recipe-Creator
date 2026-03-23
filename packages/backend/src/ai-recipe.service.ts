@@ -6,9 +6,9 @@ import {
 } from "@nestjs/common";
 
 import { ai, model } from "./ai";
-import { RecipesService } from "./service/recipes.service";
+import { RecipesService } from "./recipes.service";
+import type { Recipe } from "./recipes.types";
 import { sql } from "./sql";
-import type { Recipe } from "./types/recipes.types";
 
 type InventoryPromptItem = {
 	inventory_id: string;

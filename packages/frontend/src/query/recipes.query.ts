@@ -6,12 +6,12 @@ import {
 	getRecipe,
 	listRecipes,
 	updateRecipe,
-} from "./api/recipes.api";
+} from "./recipes.api";
 import type {
 	CreateRecipeInput,
 	Recipe,
 	UpdateRecipeInput,
-} from "./types/recipes.types";
+} from "./recipes.types";
 
 export function useGetRecipes() {
 	return useQuery({

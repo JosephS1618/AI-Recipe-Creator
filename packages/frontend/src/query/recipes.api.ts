@@ -1,10 +1,10 @@
-import { type ApiResponse, apiClient } from "../request.utils";
 import type {
 	CreateRecipeInput,
 	Recipe,
 	RecipeItem,
 	UpdateRecipeInput,
-} from "../types/recipes.types";
+} from "./recipes.types";
+import { type ApiResponse, apiClient } from "./request.utils";
 
 export async function listRecipes(): Promise<RecipeItem[]> {
 	const response = await apiClient.get<ApiResponse<RecipeItem[]>>("/recipes");

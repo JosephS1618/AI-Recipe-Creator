@@ -1,14 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { Injectable, NotFoundException } from "@nestjs/common";
-
-import { sql } from "../sql";
 import type {
 	CreateRecipe,
 	Recipe,
 	RecipeIngredient,
 	RecipeItem,
 	UpdateRecipe,
-} from "../types/recipes.types";
+} from "./recipes.types";
+import { sql } from "./sql";
 
 @Injectable()
 export class RecipesService {
