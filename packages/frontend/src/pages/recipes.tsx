@@ -59,7 +59,7 @@ export const Recipes = () => {
 	};
 
 	return (
-		<div className="max-w-6xl space-y-6">
+		<div className="px-4 space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-3xl font-bold">Recipes</h1>
 				<Button onClick={() => setDisplayDialog(true)}>Create Recipe</Button>
@@ -109,8 +109,8 @@ export const Recipes = () => {
 				</CardContent>
 			</Card>
 			<RecipeDialog
-				openCreateRecipeDialog={displayDialog}
-				toggleOpenCreateRecipeDialog={setDisplayDialog}
+				openRecipeDialog={displayDialog}
+				toggleOpenRecipeDialog={setDisplayDialog}
 				onSubmit={handleCreateRecipe}
 			/>
 		</div>
