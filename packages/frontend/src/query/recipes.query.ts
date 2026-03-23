@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createRecipe,
 	deleteRecipe,
+	generateAiRecipe,
 	getRecipe,
 	listRecipes,
 	updateRecipe,
@@ -32,6 +33,17 @@ export function useCreateRecipe() {
 
 	return useMutation<Recipe, Error, CreateRecipeInput>({
 		mutationFn: createRecipe,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["recipes"] });
+		},
+	});
+}
+
+export function useGenerateAiRecipe() {
+	const queryClient = useQueryClient();
+
+	return useMutation<Recipe, Error, void>({
+		mutationFn: generateAiRecipe,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["recipes"] });
 		},

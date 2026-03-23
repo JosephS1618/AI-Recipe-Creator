@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { RecipeDialog } from "@/components/recipe-dialog";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import {
 	type CreateRecipeInput,
 	useCreateRecipe,
+	useGenerateAiRecipe,
 	useGetRecipes,
 } from "@/query";
 
@@ -25,11 +26,13 @@ const formatCost = (cost?: number | null) =>
 
 export const Recipes = () => {
 	const [displayDialog, setDisplayDialog] = useState(false);
+	const navigate = useNavigate();
 
 	const recipesResult = useGetRecipes();
 	const recipes = recipesResult.data ?? [];
 
 	const createRecipe = useCreateRecipe();
+	const generateAiRecipe = useGenerateAiRecipe();
 	const sortedRecipes = [...recipes].sort((a, b) =>
 		a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
 	);
@@ -58,11 +61,34 @@ export const Recipes = () => {
 		});
 	};
 
+	const handleGenerateAiRecipe = () => {
+		const recipeToastId = toast.loading("Generating recipe with AI...");
+
+		generateAiRecipe.mutate(undefined, {
+			onSuccess: (recipe) => {
+				toast.success("Success: Recipe Generated", { id: recipeToastId });
+				navigate(`/recipes/${recipe.recipe_id}`);
+			},
+			onError: () => {
+				toast.dismiss(recipeToastId);
+			},
+		});
+	};
+
 	return (
 		<div className="px-4 space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-3xl font-bold">Recipes</h1>
-				<Button onClick={() => setDisplayDialog(true)}>Create Recipe</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						onClick={handleGenerateAiRecipe}
+						disabled={generateAiRecipe.isPending}
+					>
+						Generate By AI
+					</Button>
+					<Button onClick={() => setDisplayDialog(true)}>Create Recipe</Button>
+				</div>
 			</div>
 			<Card>
 				<CardHeader>

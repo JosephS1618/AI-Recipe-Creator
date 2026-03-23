@@ -1,12 +1,16 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 
+import { AiRecipeService } from "../ai-recipe.service";
 import { CurrentAccountId } from "../decorators/current-account-id";
 import { CreateRecipeDto, UpdateRecipeDto } from "../dto/recipes.dto";
 import { RecipesService } from "../service/recipes.service";
 
 @Controller()
 export class RecipesController {
-	constructor(private readonly recipesService: RecipesService) {}
+	constructor(
+		private readonly recipesService: RecipesService,
+		private readonly aiRecipeService: AiRecipeService,
+	) {}
 
 	@Get("recipes")
 	list() {
@@ -19,6 +23,11 @@ export class RecipesController {
 			...body,
 			account_id: accountId,
 		});
+	}
+
+	@Post("recipe/generate-ai")
+	generateAi(@CurrentAccountId() accountId: string) {
+		return this.aiRecipeService.generate(accountId);
 	}
 
 	@Get("recipe/:recipeId")

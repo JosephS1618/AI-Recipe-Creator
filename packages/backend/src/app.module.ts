@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
 import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod";
 
+import { AiRecipeService } from "./ai-recipe.service";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { RecipesController } from "./controller/recipes.controller";
@@ -43,6 +44,7 @@ import { UploadsService } from "./uploads.service";
 		InventoryItemsService,
 		SubscriptionService,
 		UploadsService,
+		AiRecipeService,
 		RecipesService,
 	],
 })

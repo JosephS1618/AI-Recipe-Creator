@@ -26,6 +26,13 @@ export async function createRecipe(data: CreateRecipeInput): Promise<Recipe> {
 	return response.data.data;
 }
 
+export async function generateAiRecipe(): Promise<Recipe> {
+	const response = await apiClient.post<ApiResponse<Recipe>>(
+		"/recipe/generate-ai",
+	);
+	return response.data.data;
+}
+
 export async function updateRecipe(data: UpdateRecipeInput): Promise<Recipe> {
 	const response = await apiClient.post<ApiResponse<Recipe>>(
 		`/recipe/${data.recipe_id}/update`,
