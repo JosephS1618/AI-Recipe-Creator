@@ -1,11 +1,22 @@
-import { Body, Controller, Delete, Get, Post, Put } from "@nestjs/common";
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	Post,
+	Put,
+} from "@nestjs/common";
 
 import { CurrentAccountId } from "./decorators/current-account-id";
 import {
+	CoOwner,
 	CreateInventoryDto,
 	DeleteInventoryDto,
 	InventoriesService,
 	Inventory,
+	ShareInventoryDto,
+	UnshareInventoryDto,
 	UpdateInventoryDto,
 } from "./inventories.service";
 
@@ -40,5 +51,31 @@ export class InventoriesController {
 		@Body() data: DeleteInventoryDto,
 	): Promise<void> {
 		return this.service.deleteInventory(accountId, data.id);
+	}
+
+	@Get("/inventory/:inventoryId/shared-users")
+	async getCoOwners(
+		@CurrentAccountId() accountId: string,
+		@Param("inventoryId") inventoryId: string,
+	): Promise<CoOwner[]> {
+		return this.service.getCoOwners(inventoryId, accountId);
+	}
+
+	@Post("/inventory/:inventoryId/share")
+	async share(
+		@CurrentAccountId() accountId: string,
+		@Param("inventoryId") inventoryId: string,
+		@Body() data: ShareInventoryDto,
+	): Promise<void> {
+		return this.service.shareInventory(inventoryId, accountId, data);
+	}
+
+	@Delete("/inventory/:inventoryId/unshare")
+	async unshare(
+		@CurrentAccountId() accountId: string,
+		@Param("inventoryId") inventoryId: string,
+		@Body() data: UnshareInventoryDto,
+	): Promise<void> {
+		return this.service.unshareInventory(inventoryId, accountId, data);
 	}
 }

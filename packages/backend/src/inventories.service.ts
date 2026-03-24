@@ -29,16 +29,35 @@ export const DeleteInventorySchema = z.object({
 	id: z.string().uuid("Invalid inventory ID"),
 });
 
+export const ShareInventorySchema = z.object({
+	emailOrUsername: z.string().min(1, "Email or username is required"),
+});
+
+export const UnshareInventorySchema = z.object({
+	accountId: z.string().uuid("Invalid account ID"),
+});
+
+export const CoOwnerSchema = z.object({
+	accountid: z.string().uuid(),
+	email: z.string(),
+	username: z.string(),
+});
+
 // Types
 export type Inventory = z.infer<typeof InventoryResponseSchema>;
 export type CreateInventoryInput = z.infer<typeof CreateInventorySchema>;
 export type UpdateInventoryInput = z.infer<typeof UpdateInventorySchema>;
 export type DeleteInventoryInput = z.infer<typeof DeleteInventorySchema>;
+export type ShareInventoryInput = z.infer<typeof ShareInventorySchema>;
+export type UnshareInventoryInput = z.infer<typeof UnshareInventorySchema>;
+export type CoOwner = z.infer<typeof CoOwnerSchema>;
 
 // DTOs
 export class CreateInventoryDto extends createZodDto(CreateInventorySchema) {}
 export class UpdateInventoryDto extends createZodDto(UpdateInventorySchema) {}
 export class DeleteInventoryDto extends createZodDto(DeleteInventorySchema) {}
+export class ShareInventoryDto extends createZodDto(ShareInventorySchema) {}
+export class UnshareInventoryDto extends createZodDto(UnshareInventorySchema) {}
 
 @Injectable()
 export class InventoriesService {
@@ -129,5 +148,81 @@ export class InventoriesService {
 		}
 
 		return result[0];
+	}
+
+	async getCoOwners(
+		inventoryId: string,
+		requestingAccountId: string,
+	): Promise<CoOwner[]> {
+		// Verify requesting account is linked to this inventory
+		await this.verifyInventoryOwnership(requestingAccountId, inventoryId);
+
+		// Get all co-owners with their email and username
+		return sql<CoOwner[]>`
+			SELECT a.AccountID as accountid, a.Email as email, a.Username as username
+			FROM AccountOwnsInventory aoi
+			INNER JOIN Account a ON aoi.AccountID = a.AccountID
+			WHERE aoi.InventoryID = ${inventoryId}
+			ORDER BY a.Username ASC;
+		`;
+	}
+
+	async shareInventory(
+		inventoryId: string,
+		requestingAccountId: string,
+		data: ShareInventoryInput,
+	): Promise<void> {
+		// Verify requesting account is linked to this inventory
+		await this.verifyInventoryOwnership(requestingAccountId, inventoryId);
+
+		// Find the target account by email or username
+		const targetAccount = await sql<{ accountid: string }[]>`
+			SELECT AccountID as accountid
+			FROM Account
+			WHERE Email = ${data.emailOrUsername} OR Username = ${data.emailOrUsername};
+		`;
+
+		if (targetAccount.length === 0) {
+			throw new NotFoundException("User not found");
+		}
+
+		const targetAccountId = targetAccount[0].accountid;
+
+		// Prevent self-share
+		if (targetAccountId === requestingAccountId) {
+			throw new Error("Cannot share with yourself");
+		}
+
+		// Check if already shared
+		const existing = await sql<{ count: string }[]>`
+			SELECT COUNT(*) as count
+			FROM AccountOwnsInventory
+			WHERE AccountID = ${targetAccountId} AND InventoryID = ${inventoryId};
+		`;
+
+		if (parseInt(existing[0].count, 10) > 0) {
+			throw new Error("Already shared with this user");
+		}
+
+		// Insert into AccountOwnsInventory
+		await sql`
+			INSERT INTO AccountOwnsInventory (AccountID, InventoryID)
+			VALUES (${targetAccountId}, ${inventoryId});
+		`;
+	}
+
+	async unshareInventory(
+		inventoryId: string,
+		requestingAccountId: string,
+		data: UnshareInventoryInput,
+	): Promise<void> {
+		// Verify requesting account is linked to this inventory
+		await this.verifyInventoryOwnership(requestingAccountId, inventoryId);
+
+		// Delete the co-owner link
+		await sql`
+			DELETE FROM AccountOwnsInventory
+			WHERE AccountID = ${data.accountId} AND InventoryID = ${inventoryId};
+		`;
 	}
 }
