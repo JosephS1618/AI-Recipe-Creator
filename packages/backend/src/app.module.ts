@@ -1,5 +1,7 @@
+import { join } from "node:path";
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { ServeStaticModule } from "@nestjs/serve-static";
 import { ZodSerializerInterceptor, ZodValidationPipe } from "nestjs-zod";
 
 import { AiRecipeService } from "./ai-recipe.service";
@@ -14,6 +16,8 @@ import { InventoriesService } from "./inventories.service";
 import { InventoryItemsController } from "./inventoryItems.controller";
 import { InventoryItemsService } from "./inventoryItems.service";
 import { ReceiptService } from "./receipt.service";
+import { RecipeNotesController } from "./recipe-notes.controller";
+import { RecipeNotesService } from "./recipe-notes.service";
 import { RecipesController } from "./recipes.controller";
 import { RecipesService } from "./recipes.service";
 import { ApiExceptionFilter } from "./response/api-exception.filter";
@@ -24,7 +28,12 @@ import { UploadsController } from "./uploads.controller";
 import { UploadsService } from "./uploads.service";
 
 @Module({
-	imports: [],
+	imports: [
+		ServeStaticModule.forRoot({
+			rootPath: join(__dirname, "..", "uploads"),
+			serveRoot: "/uploads",
+		}),
+	],
 	controllers: [
 		AuthController,
 		CommunityPostController,
@@ -34,6 +43,7 @@ import { UploadsService } from "./uploads.service";
 		SubscriptionController,
 		UploadsController,
 		RecipesController,
+		RecipeNotesController,
 	],
 	providers: [
 		{ provide: APP_PIPE, useClass: ZodValidationPipe },
@@ -50,6 +60,7 @@ import { UploadsService } from "./uploads.service";
 		UploadsService,
 		AiRecipeService,
 		RecipesService,
+		RecipeNotesService,
 	],
 })
 export class AppModule {}

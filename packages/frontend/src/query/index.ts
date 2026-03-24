@@ -8,6 +8,8 @@ export * from "./inventories.query";
 export type * from "./inventories.types";
 export * from "./inventoryItems.query";
 export * from "./inventoryItems.types";
+export * from "./recipe-notes.query";
+export type * from "./recipe-notes.types";
 export * from "./recipes.query";
 export type * from "./recipes.types";
 export * from "./session.utils";

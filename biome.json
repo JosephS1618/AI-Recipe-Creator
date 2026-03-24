@@ -21,6 +21,14 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["packages/frontend/src/components/ui/**"],
+			"linter": {
+				"enabled": false
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
