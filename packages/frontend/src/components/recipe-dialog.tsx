@@ -24,6 +24,7 @@ type RecipeFormData = {
 	name: string;
 	content: string;
 	cuisine: string | null;
+	cost_in_cents: number;
 	time: number;
 	ingredients: RecipeIngredient[];
 };
@@ -60,6 +61,7 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 	const [recipeName, setRecipeName] = useState("");
 	const [recipeDescription, setRecipeDescription] = useState("");
 	const [cuisine, setCuisine] = useState("");
+	const [cost, setCost] = useState(0);
 	const [time, setTime] = useState(0);
 	const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
 
@@ -69,6 +71,7 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 		setRecipeName(props.passedValues?.name?.trim() ?? "");
 		setRecipeDescription(props.passedValues?.content?.trim() ?? "");
 		setCuisine(props.passedValues?.cuisine?.trim() ?? "");
+		setCost(props.passedValues?.cost_in_cents ?? 0);
 		setTime(props.passedValues?.time ?? 0);
 
 		const recipeIngredients = props.passedValues?.ingredients ?? [];
@@ -158,6 +161,7 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 			name: recipeName.trim(),
 			content: recipeDescription.trim(),
 			cuisine: cuisine.trim() || null,
+			cost_in_cents: cost,
 			time: time,
 			ingredients: ingredients.map((ingredient) => ({
 				ingredient_name: ingredient.ingredient_name,
@@ -200,7 +204,7 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 					/>
 				</div>
 
-				<div className="grid gap-4 md:grid-cols-2">
+				<div className="grid gap-4 md:grid-cols-3">
 					<div className="grid gap-2">
 						<Label htmlFor="recipe-cuisine">Cuisine</Label>
 						<Input
@@ -219,6 +223,19 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 							onChange={(e) => {
 								const time = e.currentTarget.valueAsNumber;
 								setTime(Number.isNaN(time) ? 0 : time);
+							}}
+						/>
+					</div>
+					<div className="grid gap-2">
+						<Label htmlFor="recipe-cost-in-cents">Cost (in cents)</Label>
+						<Input
+							id="recipe-cost-in-cents"
+							type="number"
+							min={0}
+							value={cost}
+							onChange={(e) => {
+								const cost = e.currentTarget.valueAsNumber;
+								setCost(Number.isNaN(cost) ? 0 : cost);
 							}}
 						/>
 					</div>

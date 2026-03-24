@@ -20,6 +20,7 @@ type InventoryPromptItem = {
 type GeneratedRecipe = {
 	name: string;
 	content: string;
+	cost_in_cents: number;
 	cuisine: string;
 	time: number;
 	ingredients: {
@@ -73,10 +74,18 @@ export class AiRecipeService {
 					responseMimeType: "application/json",
 					responseSchema: {
 						type: Type.OBJECT,
-						required: ["name", "content", "cuisine", "time", "ingredients"],
+						required: [
+							"name",
+							"content",
+							"cost_in_cents",
+							"cuisine",
+							"time",
+							"ingredients",
+						],
 						properties: {
 							name: { type: Type.STRING },
 							content: { type: Type.STRING },
+							cost_in_cents: { type: Type.INTEGER },
 							cuisine: { type: Type.STRING },
 							time: { type: Type.INTEGER },
 							ingredients: {
@@ -105,6 +114,7 @@ export class AiRecipeService {
 				account_id: accountId,
 				name: generatedRecipe.name,
 				content: generatedRecipe.content,
+				cost_in_cents: generatedRecipe.cost_in_cents,
 				cuisine: generatedRecipe.cuisine || null,
 				time: generatedRecipe.time,
 				ingredients: generatedRecipe.ingredients,

@@ -31,6 +31,7 @@ export type CreateRecipeInput = {
 	name: string;
 	content: string;
 	cuisine: string | null;
+	cost_in_cents: number;
 	time: number;
 	ingredients: RecipeIngredient[];
 };
@@ -40,6 +41,7 @@ export type UpdateRecipeInput = {
 	name: string;
 	content: string;
 	cuisine: string | null;
+	cost_in_cents: number;
 	time: number;
 	ingredients: RecipeIngredient[];
 };

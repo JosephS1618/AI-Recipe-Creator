@@ -82,7 +82,7 @@ export class RecipesService {
 				${recipe_id},
 				${recipe.name},
 				${recipe.content},
-				${0},
+				${recipe.cost_in_cents},
 				${recipe.time},
 				${recipe.cuisine},
 				${now},
@@ -127,6 +127,7 @@ export class RecipesService {
 			SET
 				Name = ${recipe.name},
 				Content = ${recipe.content},
+				CostInCents = ${recipe.cost_in_cents},
 				Time = ${recipe.time},
 				Cuisine = ${recipe.cuisine},
 				ModificationDate = ${now}

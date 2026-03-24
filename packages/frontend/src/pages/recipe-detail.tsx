@@ -43,7 +43,7 @@ export const RecipeDetailPage = () => {
 				</div>
 
 				<div className="flex gap-2">
-					<Button asChild variant="outline">
+					<Button variant="outline">
 						<Link to="/recipes">Back</Link>
 					</Button>
 
@@ -140,10 +140,11 @@ export const RecipeDetailPage = () => {
 					openRecipeDialog={recipeDialog}
 					toggleOpenRecipeDialog={toggleRecipeDialog}
 					title="Update Recipe"
-					submitLabel="Save"
+					submitLabel="Update"
 					passedValues={{
 						name: recipe.name,
 						content: recipe.content,
+						cost_in_cents: recipe.cost_in_cents,
 						cuisine: recipe.cuisine,
 						time: recipe.time,
 						ingredients: recipe.ingredients,

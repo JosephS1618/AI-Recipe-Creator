@@ -40,6 +40,7 @@ export async function updateRecipe(data: UpdateRecipeInput): Promise<Recipe> {
 			name: data.name,
 			content: data.content,
 			cuisine: data.cuisine,
+			cost_in_cents: data.cost_in_cents,
 			time: data.time,
 			ingredients: data.ingredients,
 		},

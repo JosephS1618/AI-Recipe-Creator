@@ -9,6 +9,7 @@ export const RecipeBodySchema = z.object({
 	name: z.string(),
 	content: z.string(),
 	cuisine: z.string().nullable(),
+	cost_in_cents: z.number().int(),
 	time: z.number().int(),
 	ingredients: z.array(RecipeIngredientSchema),
 });
