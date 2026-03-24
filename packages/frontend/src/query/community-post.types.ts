@@ -7,3 +7,10 @@ export type CommunityPostItem = {
 	account_id: string;
 	recipe_id: string | null;
 };
+
+export type CommunityPostBody = {
+	title: string;
+	body: string;
+	visibility: "private" | "public";
+	recipe_id: string | null;
+};
