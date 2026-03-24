@@ -1,6 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 
-import type { CommunityPostItem } from "./community-post.types";
+import type {
+	CommunityPostItem,
+	CreateCommunityPost,
+} from "./community-post.types";
 import { sql } from "./sql";
 
 @Injectable()
@@ -19,5 +23,31 @@ export class CommunityPostService {
 			ORDER BY CreationDate DESC;
 		`;
 		return posts;
+	}
+
+	async create(post: CreateCommunityPost): Promise<void> {
+		const post_id = randomUUID();
+		const now = new Date().toISOString();
+
+		await sql`
+			INSERT INTO Post (
+				PostID,
+				Title,
+				Body,
+				CreationDate,
+				Visibility,
+				AccountID,
+				RecipeID
+			)
+			VALUES (
+				${post_id},
+				${post.title},
+				${post.body},
+				${now},
+				${post.visibility},
+				${post.account_id},
+				${post.recipe_id}
+			);
+		`;
 	}
 }
