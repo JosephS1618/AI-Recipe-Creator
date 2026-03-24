@@ -1,5 +1,7 @@
 export * from "./auth.query";
 export type * from "./auth.types";
+export * from "./community-post.query";
+export type * from "./community-post.types";
 export * from "./ingredients.query";
 export type * from "./ingredients.types";
 export * from "./inventories.query";

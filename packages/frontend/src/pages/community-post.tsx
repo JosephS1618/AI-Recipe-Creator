@@ -16,12 +16,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-
-import { useGetRecipes } from "@/query";
+import { useGetPosts, useGetRecipes } from "@/query";
 
 export const CommunityPost = () => {
 	const { data: recipes = [] } = useGetRecipes();
+	const { data: posts = [] } = useGetPosts();
 	const [showCreatePostForm, toggleCreatePostForm] = useState(false);
 
 	return (
@@ -86,7 +87,17 @@ export const CommunityPost = () => {
 				<CardHeader>
 					<CardTitle>Community Posts</CardTitle>
 				</CardHeader>
-				<CardContent></CardContent>
+				<CardContent>
+					<Table>
+						<TableBody>
+							{posts.map((post) => (
+								<TableRow key={post.post_id}>
+									<TableCell>{post.title}</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</CardContent>
 			</Card>
 		</div>
 	);
