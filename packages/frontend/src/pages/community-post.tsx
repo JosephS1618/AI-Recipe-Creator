@@ -33,6 +33,12 @@ export const CommunityPost = () => {
 		"private",
 	);
 	const [recipeId, setRecipeId] = useState<string | null>(null);
+	const [selectedPostId, setSelectedPostId] = useState("");
+
+	const selectedPost = posts.find((post) => post.post_id === selectedPostId);
+	const selectedPostRecipe = recipes.find(
+		(recipe) => recipe.recipe_id === selectedPost?.recipe_id,
+	);
 
 	const { currentUser } = useAccountSession();
 
@@ -168,22 +174,46 @@ export const CommunityPost = () => {
 				</Card>
 			)}
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Community Posts</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Table>
-						<TableBody>
-							{posts.map((post) => (
-								<TableRow key={post.post_id}>
-									<TableCell>{post.title}</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</CardContent>
-			</Card>
+			<div className="flex gap-8">
+				<Card className="w-1/3">
+					<CardHeader>
+						<CardTitle>Community Posts</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<Table>
+							<TableBody>
+								{posts.map((post) => (
+									<TableRow
+										key={post.post_id}
+										className="cursor-pointer hover:bg-muted"
+										onClick={() => setSelectedPostId(post.post_id)}
+									>
+										<TableCell>{post.title}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</CardContent>
+				</Card>
+
+				{selectedPost && (
+					<Card className="w-2/3">
+						<CardContent className="space-y-4">
+							<div className="text-xs text-muted-foreground ">
+								{selectedPostRecipe?.name?.trim()
+									? `Recipe: ${selectedPostRecipe?.name}`
+									: "NO RECIPE"}
+							</div>
+						</CardContent>
+						<CardHeader>
+							<CardTitle>{selectedPost.title}</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-2">{selectedPost.body}</div>
+						</CardContent>
+					</Card>
+				)}
+			</div>
 		</div>
 	);
 };
