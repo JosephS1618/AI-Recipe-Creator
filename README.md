@@ -6,8 +6,7 @@ This app helps beginners save money by tracking their groceries. It uses AI to s
 - You can find the milestone deliverables in the [milestones](milestones) folder.
 - The frontend is in the [packages/frontend](packages/frontend) folder.
 - The backend is in the [packages/backend](packages/backend) folder.
-- The database migrations are in the [packages/sql/migrations](packages/sql/migrations) folder.
-- The database setup script is in the [packages/scripts](packages/scripts) folder.
+- The setup SQL is [packages/sql/setup.sql](packages/sql/setup.sql).
 
 ## Project setup
 
@@ -30,8 +29,7 @@ psql --version
 
 This will:
 - Create the database with database name `cpsc_304_project`
-- Run the initial migration (runs `packages/sql/migrations/001_init.sql`)
-- Insert demo data (runs `packages/scripts/test_data/test_insert.sql`)
+- Run `packages/sql/setup.sql`
 
 ```bash
 chmod +x ./packages/scripts/db_setup.sh
@@ -74,12 +72,7 @@ npm run start:frontend
 
 ### If you want to reset the database
 
-You can first delete the database:
-```bash
-dropdb cpsc_304_project
-```
-
-Then run `db_setup.sh` again:
+Just run `db_setup.sh` again, it will drop the database and create a new one with the demo data:
 ```bash
 ./packages/scripts/db_setup.sh
 ```
