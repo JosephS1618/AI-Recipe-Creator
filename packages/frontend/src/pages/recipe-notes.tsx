@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { toast } from "sonner";
 
-import { RecipeMultiSelect } from "@/components/recipe-multi-select";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import {
+	RecipeNoteForm,
+	type RecipeNoteFormValue,
+} from "@/components/recipe-note-form";
+import { Card, CardContent } from "@/components/ui/card";
 import {
 	Table,
 	TableBody,
@@ -13,39 +15,34 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { UploadButton } from "@/components/upload-button";
-import { formatDate, getPhotoUrl } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { useCreateRecipeNote, useGetRecipeNotes } from "@/query";
 
 export function RecipeNotes() {
-	const [note, setNote] = useState("");
-	const [photo, setPhoto] = useState<string | null>(null);
-	const [recipeIds, setRecipeIds] = useState<string[]>([]);
+	const [formValue, setFormValue] = useState<RecipeNoteFormValue>({
+		note: "",
+		photo: null,
+		recipe_ids: [],
+	});
 
 	const recipeNotesResult = useGetRecipeNotes();
 	const createRecipeNote = useCreateRecipeNote();
 	const recipeNotes = recipeNotesResult.data ?? [];
 
-	const handleSubmit = () => {
-		const trimmedNote = note.trim();
-
-		if (!trimmedNote) {
-			toast.error("Please enter a note.");
-			return;
-		}
-
+	const handleSubmit = (value: RecipeNoteFormValue) => {
 		createRecipeNote.mutate(
 			{
-				note: trimmedNote,
-				photo,
-				recipe_ids: recipeIds,
+				note: value.note,
+				photo: value.photo,
+				recipe_ids: value.recipe_ids,
 			},
 			{
 				onSuccess: () => {
-					setNote("");
-					setPhoto(null);
-					setRecipeIds([]);
+					setFormValue({
+						note: "",
+						photo: null,
+						recipe_ids: [],
+					});
 					toast.success("Recipe note created.");
 				},
 			},
@@ -79,7 +76,12 @@ export function RecipeNotes() {
 									{recipeNotes.map((recipeNote) => (
 										<TableRow key={recipeNote.recipe_note_id}>
 											<TableCell className="max-w-md truncate font-medium">
-												{recipeNote.note}
+												<Link
+													to={`/recipe-notes/${recipeNote.recipe_note_id}`}
+													className="hover:underline"
+												>
+													{recipeNote.note}
+												</Link>
 											</TableCell>
 											<TableCell>{recipeNote.photo ? "Yes" : "No"}</TableCell>
 											<TableCell>
@@ -97,68 +99,14 @@ export function RecipeNotes() {
 				)}
 			</section>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Create Note</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="recipe-note">Note</Label>
-						<Textarea
-							id="recipe-note"
-							value={note}
-							onChange={(event) => setNote(event.currentTarget.value)}
-							placeholder="What happened when you cooked this?"
-							rows={5}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label>Recipes</Label>
-						<RecipeMultiSelect value={recipeIds} onChange={setRecipeIds} />
-					</div>
-
-					<div className="space-y-3">
-						<Label>Photo</Label>
-						<div className="flex flex-wrap items-center gap-3">
-							<UploadButton
-								text={photo ? "Replace Image" : "Upload Image"}
-								disabled={createRecipeNote.isPending}
-								onUploaded={(fileName) => {
-									setPhoto(fileName);
-									toast.success("Image uploaded.");
-								}}
-							/>
-							{photo ? (
-								<Button
-									type="button"
-									variant="ghost"
-									onClick={() => setPhoto(null)}
-								>
-									Remove Image
-								</Button>
-							) : null}
-						</div>
-
-						{photo ? (
-							<img
-								src={getPhotoUrl(photo)}
-								alt="Uploaded recipe note"
-								className="max-h-72 w-full rounded-lg border object-cover md:max-w-md"
-							/>
-						) : null}
-					</div>
-
-					<div className="flex justify-end">
-						<Button
-							onClick={handleSubmit}
-							disabled={createRecipeNote.isPending}
-						>
-							{createRecipeNote.isPending ? "Creating..." : "Create Note"}
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
+			<RecipeNoteForm
+				title="Create Note"
+				submitLabel="Create Note"
+				value={formValue}
+				onChange={setFormValue}
+				onSubmit={handleSubmit}
+				isSubmitting={createRecipeNote.isPending}
+			/>
 		</div>
 	);
 }

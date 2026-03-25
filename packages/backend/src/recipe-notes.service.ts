@@ -32,12 +32,23 @@ export const CreateRecipeNoteSchema = z.object({
 
 export class CreateRecipeNoteDto extends createZodDto(CreateRecipeNoteSchema) {}
 
+export const UpdateRecipeNoteSchema = CreateRecipeNoteSchema;
+
+export class UpdateRecipeNoteDto extends createZodDto(UpdateRecipeNoteSchema) {}
+
 export type RecipeNoteRecipe = z.infer<typeof RecipeNoteRecipeSchema>;
 export type RecipeNote = z.infer<typeof RecipeNoteSchema>;
 export type RecipeNoteListItem = z.infer<typeof RecipeNoteListItemSchema>;
 export type CreateRecipeNoteBody = z.infer<typeof CreateRecipeNoteSchema>;
 
 export type CreateRecipeNote = CreateRecipeNoteBody & {
+	account_id: string;
+};
+
+export type UpdateRecipeNoteBody = z.infer<typeof UpdateRecipeNoteSchema>;
+
+export type UpdateRecipeNote = UpdateRecipeNoteBody & {
+	recipe_note_id: string;
 	account_id: string;
 };
 
@@ -109,10 +120,7 @@ export class RecipeNotesService {
 		return this.get(recipe_note_id, recipeNote.account_id);
 	}
 
-	private async get(
-		recipe_note_id: string,
-		account_id: string,
-	): Promise<RecipeNote> {
+	async get(recipe_note_id: string, account_id: string): Promise<RecipeNote> {
 		const [recipeNote] = await this.loadRows(account_id, recipe_note_id);
 
 		if (!recipeNote) {
@@ -120,6 +128,53 @@ export class RecipeNotesService {
 		}
 
 		return recipeNote;
+	}
+
+	async update(recipeNote: UpdateRecipeNote): Promise<RecipeNote> {
+		const now = new Date().toISOString();
+		const recipeIds = [...new Set(recipeNote.recipe_ids)];
+
+		await this.get(recipeNote.recipe_note_id, recipeNote.account_id);
+
+		await sql`
+			UPDATE RecipeNote
+			SET
+				Photo = ${recipeNote.photo ?? null},
+				Note = ${recipeNote.note},
+				ModificationDate = ${now}
+			WHERE RecipeNoteID = ${recipeNote.recipe_note_id}
+				AND AccountID = ${recipeNote.account_id};
+		`;
+
+		await sql`
+			DELETE FROM RecipeNoteAnnotatesRecipe
+			WHERE RecipeNoteID = ${recipeNote.recipe_note_id};
+		`;
+
+		for (const recipe_id of recipeIds) {
+			await sql`
+				INSERT INTO RecipeNoteAnnotatesRecipe (
+					RecipeNoteID,
+					RecipeID
+				)
+				VALUES (
+					${recipeNote.recipe_note_id},
+					${recipe_id}
+				);
+			`;
+		}
+
+		return this.get(recipeNote.recipe_note_id, recipeNote.account_id);
+	}
+
+	async remove(recipe_note_id: string, account_id: string): Promise<void> {
+		await this.get(recipe_note_id, account_id);
+
+		await sql`
+			DELETE FROM RecipeNote
+			WHERE RecipeNoteID = ${recipe_note_id}
+				AND AccountID = ${account_id};
+		`;
 	}
 
 	private async loadRows(

@@ -21,3 +21,7 @@ export type CreateRecipeNoteInput = {
 	photo?: string | null;
 	recipe_ids: string[];
 };
+
+export type UpdateRecipeNoteInput = CreateRecipeNoteInput & {
+	recipe_note_id: string;
+};

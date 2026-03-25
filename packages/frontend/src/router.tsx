@@ -6,6 +6,7 @@ import { Inventories } from "./pages/inventories";
 import { InventoryDetail } from "./pages/inventory-detail";
 import { Login } from "./pages/login";
 import { RecipeDetailPage } from "./pages/recipe-detail";
+import { RecipeNoteDetail } from "./pages/recipe-note-detail";
 import { RecipeNotes } from "./pages/recipe-notes";
 import { Recipes } from "./pages/recipes";
 import SettingsPage from "./pages/settings";
@@ -54,6 +55,10 @@ export const router = createBrowserRouter([
 			{
 				path: "recipe-notes",
 				Component: RecipeNotes,
+			},
+			{
+				path: "recipe-notes/:recipeNoteId",
+				Component: RecipeNoteDetail,
 			},
 			{
 				path: "settings",
