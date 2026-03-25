@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import { useAccountSession } from "@/components/account-provider";
 import { SubscriptionCard } from "@/components/subscription-card";
 import { Button } from "@/components/ui/button";
@@ -6,26 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRefreshCurrentUser } from "@/query";
 
 export default function SettingsPage() {
-	const navigate = useNavigate();
 	const { currentUser, saveCurrentUser } = useAccountSession();
 	const refreshMutation = useRefreshCurrentUser();
-
-	if (!currentUser) {
-		return (
-			<div className="max-w-2xl">
-				<Card>
-					<CardContent className="pt-6">
-						<div className="text-center text-muted-foreground">
-							Please log in to view account settings.
-						</div>
-						<div className="mt-4 flex justify-center">
-							<Button onClick={() => navigate("/login")}>Go to Login</Button>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
 
 	const handleRefreshUser = () => {
 		refreshMutation.mutate(undefined, {
@@ -50,21 +31,21 @@ export default function SettingsPage() {
 					<div className="grid gap-2">
 						<div className="text-sm font-medium">Username</div>
 						<div className="text-sm text-muted-foreground">
-							{currentUser.username}
+							{currentUser?.username}
 						</div>
 					</div>
 
 					<div className="grid gap-2">
 						<div className="text-sm font-medium">Email</div>
 						<div className="text-sm text-muted-foreground">
-							{currentUser.email}
+							{currentUser?.email}
 						</div>
 					</div>
 
 					<div className="grid gap-2">
 						<div className="text-sm font-medium">Account ID</div>
 						<div className="text-sm font-mono text-muted-foreground break-all">
-							{currentUser.accountId}
+							{currentUser?.accountId}
 						</div>
 					</div>
 

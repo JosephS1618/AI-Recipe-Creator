@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { toast } from "sonner";
-import { useAccountSession } from "@/components/account-provider";
 import { InventoryDialog } from "@/components/inventory-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +23,6 @@ import {
 type DialogMode = "create" | "update";
 
 export function Inventories() {
-	const navigate = useNavigate();
-	const { currentUser } = useAccountSession();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [dialogMode, setDialogMode] = useState<DialogMode>("create");
 	const [selectedInventory, setSelectedInventory] = useState<Inventory>();
@@ -35,23 +32,6 @@ export function Inventories() {
 	const createMutation = useCreateInventory();
 	const updateMutation = useUpdateInventory();
 	const deleteMutation = useDeleteInventory();
-
-	if (!currentUser) {
-		return (
-			<div className="max-w-2xl">
-				<Card>
-					<CardContent className="pt-6">
-						<div className="text-center text-muted-foreground">
-							Please log in to view your inventories.
-						</div>
-						<div className="mt-4 flex justify-center">
-							<Button onClick={() => navigate("/login")}>Go to Login</Button>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
 
 	const handleCreateClick = () => {
 		setDialogMode("create");

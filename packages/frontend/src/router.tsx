@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { Layout } from "./components/layout";
+import { withLoginRequired } from "./components/require-login";
 import { CommunityPost } from "./pages/community-post";
 import { Ingredients } from "./pages/ingredients";
 import { Inventories } from "./pages/inventories";
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "ingredients",
-				Component: Ingredients,
+				Component: withLoginRequired(Ingredients),
 			},
 			{
 				path: "login",
@@ -34,35 +35,35 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: "inventories",
-				Component: Inventories,
+				Component: withLoginRequired(Inventories),
 			},
 			{
 				path: "inventories/:inventoryId",
-				Component: InventoryDetail,
+				Component: withLoginRequired(InventoryDetail),
 			},
 			{
 				path: "recipes",
-				Component: Recipes,
+				Component: withLoginRequired(Recipes),
 			},
 			{
 				path: "recipes/:recipeId",
-				Component: RecipeDetailPage,
+				Component: withLoginRequired(RecipeDetailPage),
 			},
 			{
 				path: "community-post",
-				Component: CommunityPost,
+				Component: withLoginRequired(CommunityPost),
 			},
 			{
 				path: "recipe-notes",
-				Component: RecipeNotes,
+				Component: withLoginRequired(RecipeNotes),
 			},
 			{
 				path: "recipe-notes/:recipeNoteId",
-				Component: RecipeNoteDetail,
+				Component: withLoginRequired(RecipeNoteDetail),
 			},
 			{
 				path: "settings",
-				Component: SettingsPage,
+				Component: withLoginRequired(SettingsPage),
 			},
 		],
 	},
