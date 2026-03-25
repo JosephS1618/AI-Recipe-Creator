@@ -32,14 +32,14 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 
 	return (
 		<TableRow>
-			<TableCell className="font-medium">{ingredient.name}</TableCell>
+			<TableCell>{ingredient.name}</TableCell>
 
 			<TableCell>
 				<Input
 					type="number"
 					min={0}
 					value={carbs}
-					onChange={(e) => setCarbs(Math.max(0, Number(e.target.value)))}
+					onChange={(e) => setCarbs(Number(e.target.value))}
 					className="w-24"
 				/>
 			</TableCell>
@@ -49,7 +49,7 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 					type="number"
 					min={0}
 					value={protein}
-					onChange={(e) => setProtein(Math.max(0, Number(e.target.value)))}
+					onChange={(e) => setProtein(Number(e.target.value))}
 					className="w-24"
 				/>
 			</TableCell>
@@ -59,7 +59,7 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 					type="number"
 					min={0}
 					value={fat}
-					onChange={(e) => setFat(Math.max(0, Number(e.target.value)))}
+					onChange={(e) => setFat(Number(e.target.value))}
 					className="w-24"
 				/>
 			</TableCell>
@@ -67,10 +67,8 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 			<TableCell>
 				<div className="flex gap-2">
 					<Button
-						variant="default"
+						variant="outline"
 						onClick={() => {
-							setUpdateMessage("Updating...");
-
 							editIngredient.mutate(
 								{
 									name: ingredient.name,
@@ -94,15 +92,16 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 					</Button>
 
 					<Button
-						variant="destructive"
+						variant="outline"
+						className="text-destructive hover:text-destructive"
 						onClick={() => removeIngredient.mutate({ name: ingredient.name })}
 					>
-						Remove
+						Delete
 					</Button>
 				</div>
 
 				{updateMessage && (
-					<p className="mt-2 text-sm text-muted-foreground">{updateMessage}</p>
+					<p className="text-sm text-muted-foreground">{updateMessage}</p>
 				)}
 			</TableCell>
 		</TableRow>
@@ -173,7 +172,7 @@ function AddIngredient() {
 						name="name"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						placeholder=""
+						placeholder="Ingredient Name"
 					/>
 				</div>
 
@@ -185,10 +184,7 @@ function AddIngredient() {
 						type="number"
 						min={0}
 						value={carbs}
-						onChange={(e) => {
-							const value = e.currentTarget.valueAsNumber;
-							setCarbs(Math.max(0, Number.isNaN(value) ? 0 : value));
-						}}
+						onChange={(e) => setCarbs(Number(e.target.value))}
 					/>
 				</div>
 
@@ -200,10 +196,7 @@ function AddIngredient() {
 						type="number"
 						min={0}
 						value={protein}
-						onChange={(e) => {
-							const value = e.currentTarget.valueAsNumber;
-							setProtein(Math.max(0, Number.isNaN(value) ? 0 : value));
-						}}
+						onChange={(e) => setProtein(Number(e.target.value))}
 					/>
 				</div>
 
@@ -215,10 +208,7 @@ function AddIngredient() {
 						type="number"
 						min={0}
 						value={fat}
-						onChange={(e) => {
-							const value = e.currentTarget.valueAsNumber;
-							setFat(Math.max(0, Number.isNaN(value) ? 0 : value));
-						}}
+						onChange={(e) => setFat(Number(e.target.value))}
 					/>
 				</div>
 
@@ -295,7 +285,8 @@ function AddIngredientByAi() {
 
 export function Ingredients() {
 	return (
-		<div className="mx-auto flex max-w-5xl flex-col gap-6">
+		<div className="px-4 space-y-6">
+			<h1 className="text-3xl font-bold">Ingredients</h1>
 			<IngredientsList />
 			<AddIngredient />
 			<AddIngredientByAi />

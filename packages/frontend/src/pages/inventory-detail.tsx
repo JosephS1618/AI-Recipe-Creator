@@ -55,17 +55,14 @@ function InventoryItemList({
 
 	return (
 		<TableRow>
-			<TableCell className="font-medium">{item.ingredient_name}</TableCell>
+			<TableCell>{item.ingredient_name}</TableCell>
 
 			<TableCell>
 				<Input
 					type="number"
 					min={0}
 					value={quantity}
-					onChange={(e) => {
-						const value = e.currentTarget.valueAsNumber;
-						setQuantity(Math.max(0, Number.isNaN(value) ? 0 : value));
-					}}
+					onChange={(e) => setQuantity(Number(e.target.value))}
 					className="w-24"
 				/>
 			</TableCell>
@@ -91,6 +88,7 @@ function InventoryItemList({
 			<TableCell>
 				<div className="flex flex-wrap gap-2">
 					<Button
+						variant="outline"
 						onClick={() => {
 							editInventoryItem.mutate({
 								inventoryId,
@@ -110,7 +108,8 @@ function InventoryItemList({
 					</Button>
 
 					<Button
-						variant="destructive"
+						variant="outline"
+						className="text-destructive hover:text-destructive"
 						onClick={() => {
 							removeInventoryItem.mutate({
 								inventoryId,
@@ -121,7 +120,7 @@ function InventoryItemList({
 							});
 						}}
 					>
-						Remove
+						Delete
 					</Button>
 				</div>
 			</TableCell>
@@ -190,14 +189,18 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 		<Card>
 			<CardHeader>
 				<CardTitle>Add Inventory Item</CardTitle>
+				<p className="text-sm text-muted-foreground">
+					Note: only items from the ingredients table can be added to inventory
+				</p>
 			</CardHeader>
 
 			<CardContent className="grid gap-4 md:grid-cols-4">
 				<div className="grid gap-2">
-					<Label htmlFor="ingredient_name">Ingredient Name</Label>
+					<Label htmlFor="ingredient_name">Name</Label>
 					<Input
 						id="ingredient_name"
 						value={ingredientName}
+						placeholder="Ingredient Name"
 						onChange={(e) => setIngredientName(e.target.value)}
 					/>
 				</div>
@@ -209,10 +212,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 						type="number"
 						min={0}
 						value={quantity}
-						onChange={(e) => {
-							const value = e.currentTarget.valueAsNumber;
-							setQuantity(Math.max(0, Number.isNaN(value) ? 0 : value));
-						}}
+						onChange={(e) => setQuantity(Number(e.target.value))}
 					/>
 				</div>
 
@@ -276,11 +276,11 @@ export function InventoryDetail() {
 	const addInventoryItemsFromReceipt = useAddInventoryItemsFromReceipt();
 
 	if (!inventoryId) {
-		return <div>Oops.. Inventory not found</div>;
+		return <div>Inventory not found</div>;
 	}
 
 	return (
-		<div className="max-w-7xl space-y-6">
+		<div className="px-4 space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
@@ -330,7 +330,7 @@ export function InventoryDetail() {
 						}}
 					/>
 
-					<Button asChild variant="outline">
+					<Button variant="outline">
 						<Link to="/inventories">Back to Inventories</Link>
 					</Button>
 				</div>
