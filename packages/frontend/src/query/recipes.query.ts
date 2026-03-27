@@ -9,14 +9,15 @@ import {
 } from "./recipes.api";
 import type {
 	CreateRecipeInput,
+	ListRecipesQuery,
 	Recipe,
 	UpdateRecipeInput,
 } from "./recipes.types";
 
-export function useGetRecipes() {
+export function useGetRecipes(query: ListRecipesQuery = {}) {
 	return useQuery({
-		queryKey: ["recipes"],
-		queryFn: listRecipes,
+		queryKey: ["recipes", query],
+		queryFn: () => listRecipes(query),
 	});
 }
 

@@ -1,8 +1,12 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 
 import { AiRecipeService } from "./ai-recipe.service";
 import { CurrentAccountId } from "./decorators/current-account-id";
-import { CreateRecipeDto, UpdateRecipeDto } from "./recipes.dto";
+import {
+	CreateRecipeDto,
+	ListRecipesQueryDto,
+	UpdateRecipeDto,
+} from "./recipes.dto";
 import { RecipesService } from "./recipes.service";
 
 @Controller()
@@ -13,8 +17,12 @@ export class RecipesController {
 	) {}
 
 	@Get("recipes")
-	list() {
-		return this.recipesService.list();
+	list(@Query() query: ListRecipesQueryDto) {
+		if (query.minTotalProtein !== undefined) {
+			return this.recipesService.listWithMinTotalProtein(query.minTotalProtein);
+		} else {
+			return this.recipesService.list();
+		}
 	}
 
 	@Post("recipe/create")

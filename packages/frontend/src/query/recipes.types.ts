@@ -25,6 +25,7 @@ export type RecipeItem = {
 	cost_in_cents: number;
 	creation_date: string;
 	modification_date: string;
+	total_protein?: number;
 };
 
 export type CreateRecipeInput = {
@@ -44,4 +45,8 @@ export type UpdateRecipeInput = {
 	cost_in_cents: number;
 	time: number;
 	ingredients: RecipeIngredient[];
+};
+
+export type ListRecipesQuery = {
+	minTotalProtein?: number;
 };

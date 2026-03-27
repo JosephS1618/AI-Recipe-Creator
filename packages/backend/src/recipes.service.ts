@@ -173,4 +173,30 @@ export class RecipesService {
 			WHERE RecipeID = ${recipe_id} AND AccountID = ${account_id};
 		`;
 	}
+
+	async listWithMinTotalProtein(target: number): Promise<RecipeItem[]> {
+		return sql<RecipeItem[]>`
+			SELECT
+				r.RecipeID AS recipe_id,
+				r.Name AS name,
+				r.Content AS content,
+				r.Cuisine AS cuisine,
+				r.Time AS time,
+				r.CostInCents AS cost_in_cents,
+				r.CreationDate AS creation_date,
+				r.ModificationDate AS modification_date,
+				SUM(ri.Quantity * i.Protein) AS total_protein
+			FROM
+				Recipe r,
+				RecipeIngredient ri,
+				Ingredient i
+			WHERE
+				r.RecipeID = ri.RecipeID
+				AND ri.IngredientName = i.Name
+			GROUP BY
+				r.RecipeID
+			HAVING
+				SUM(ri.Quantity * i.Protein) >= ${target};
+		`;
+	}
 }
