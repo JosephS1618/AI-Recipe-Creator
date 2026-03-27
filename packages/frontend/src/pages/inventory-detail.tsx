@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,6 @@ import {
 	useAddInventoryItem,
 	useAddInventoryItemsFromReceipt,
 	useEditInventoryItem,
-	useFetchInventories,
 	useGetInventoryItems,
 	useRemoveInventoryItem,
 } from "@/query";
@@ -276,27 +274,13 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 export function InventoryDetail() {
 	const { inventoryId } = useParams();
 	const addInventoryItemsFromReceipt = useAddInventoryItemsFromReceipt();
-	const { data: inventories = [] } = useFetchInventories();
 
 	if (!inventoryId) {
 		return <div>Inventory not found</div>;
 	}
 
-	// Find the inventory by ID to get its name
-	const currentInventory = inventories.find(
-		(inv) => inv.inventoryid === inventoryId,
-	);
-	const inventoryName = currentInventory?.name || "Inventory";
-
 	return (
 		<div className="px-4 space-y-6">
-			<Breadcrumb
-				items={[
-					{ label: "Inventories", href: "/inventories" },
-					{ label: inventoryName },
-				]}
-			/>
-
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
