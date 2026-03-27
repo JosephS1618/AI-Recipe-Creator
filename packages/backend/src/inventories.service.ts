@@ -23,6 +23,8 @@ export const InventoryResponseSchema = z.object({
 	name: z.string(),
 	description: z.string(),
 	type: z.string(),
+	ownerAccountId: z.string().uuid(),
+	ownerUsername: z.string(),
 });
 
 export const DeleteInventorySchema = z.object({
@@ -63,7 +65,27 @@ export class UnshareInventoryDto extends createZodDto(UnshareInventorySchema) {}
 export class InventoriesService {
 	async listInventories(accountId: string): Promise<Inventory[]> {
 		return sql<Inventory[]>`
-			SELECT i.*
+			SELECT 
+			  i.InventoryID as inventoryid,
+			  i.Name as name,
+			  i.Description as description,
+			  i.Type as type,
+			  (
+			    SELECT a.AccountID 
+			    FROM AccountOwnsInventory aoi2
+			    INNER JOIN Account a ON aoi2.AccountID = a.AccountID
+			    WHERE aoi2.InventoryID = i.InventoryID
+			    ORDER BY a.Username ASC
+			    LIMIT 1
+			  ) as ownerAccountId,
+			  (
+			    SELECT a.Username
+			    FROM AccountOwnsInventory aoi2
+			    INNER JOIN Account a ON aoi2.AccountID = a.AccountID
+			    WHERE aoi2.InventoryID = i.InventoryID
+			    ORDER BY a.Username ASC
+			    LIMIT 1
+			  ) as ownerUsername
 			FROM Inventory i
 			INNER JOIN AccountOwnsInventory aoi ON i.InventoryID = aoi.InventoryID
 			WHERE aoi.AccountID = ${accountId}
