@@ -61,9 +61,10 @@ export type RecipeNoteProjectionColumn = z.infer<
 	typeof RecipeNoteProjectionColumnSchema
 >;
 export type ProjectRecipeNotesBody = z.infer<typeof ProjectRecipeNotesSchema>;
+export type RecipeNoteProjectionCell = string | null;
 export type RecipeNoteProjectionResult = {
 	columns: RecipeNoteProjectionColumn[];
-	rows: (string | null)[][];
+	rows: RecipeNoteProjectionCell[][];
 };
 
 export type CreateRecipeNote = CreateRecipeNoteBody & {
@@ -217,25 +218,21 @@ export class RecipeNotesService {
 		body: ProjectRecipeNotesBody,
 	): Promise<RecipeNoteProjectionResult> {
 		const columns = body.columns;
-		const selectColumns = Object.fromEntries(
-			columns.map((column) => [
-				column,
-				sql(recipeNoteProjectionColumns[column]),
-			]),
-		);
+		const selectColumns = columns.flatMap((column, index) => [
+			index ? sql`,` : sql``,
+			sql`${sql(recipeNoteProjectionColumns[column])}`,
+		]);
 
-		// Use sql({ ..., modification_date: sql("modificationdate") }) to create
-		// column alias like `"modificationdate" AS "modification_date"` here
-		const rows = await sql<Record<string, string | null>[]>`
-			SELECT ${sql(selectColumns)}
+		const rows = await sql<Record<string, RecipeNoteProjectionCell>[]>`
+			SELECT ${selectColumns}
 			FROM RecipeNote
 			WHERE AccountID = ${account_id}
 			ORDER BY ModificationDate DESC;
-		`;
+		`.values(); // return rows as an array of values for each column, instead of objects
 
 		return {
 			columns,
-			rows: rows.map((row) => columns.map((column) => row[column] ?? null)),
+			rows: rows.map((row) => [...row]),
 		};
 	}
 
