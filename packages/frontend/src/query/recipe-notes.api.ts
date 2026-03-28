@@ -1,14 +1,19 @@
 import type {
 	CreateRecipeNoteInput,
+	ListRecipeNotesInput,
 	RecipeNote,
-	RecipeNoteListItem,
+	RecipeNoteTableData,
 	UpdateRecipeNoteInput,
 } from "./recipe-notes.types";
 import { type ApiResponse, apiClient } from "./request.utils";
 
-export async function listRecipeNotes(): Promise<RecipeNoteListItem[]> {
-	const response =
-		await apiClient.get<ApiResponse<RecipeNoteListItem[]>>("/recipe-notes");
+export async function listRecipeNotes(
+	data: ListRecipeNotesInput,
+): Promise<RecipeNoteTableData> {
+	const response = await apiClient.post<ApiResponse<RecipeNoteTableData>>(
+		"/recipe-notes",
+		data,
+	);
 	return response.data.data;
 }
 

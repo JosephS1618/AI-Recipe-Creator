@@ -36,10 +36,36 @@ export const UpdateRecipeNoteSchema = CreateRecipeNoteSchema;
 
 export class UpdateRecipeNoteDto extends createZodDto(UpdateRecipeNoteSchema) {}
 
+export const RecipeNoteProjectionColumnSchema = z.enum([
+	"recipe_note_id",
+	"photo",
+	"note",
+	"account_id",
+	"creation_date",
+	"modification_date",
+]);
+
+export const ProjectRecipeNotesSchema = z.object({
+	columns: z.array(RecipeNoteProjectionColumnSchema).min(1),
+});
+
+export class ProjectRecipeNotesDto extends createZodDto(
+	ProjectRecipeNotesSchema,
+) {}
+
 export type RecipeNoteRecipe = z.infer<typeof RecipeNoteRecipeSchema>;
 export type RecipeNote = z.infer<typeof RecipeNoteSchema>;
 export type RecipeNoteListItem = z.infer<typeof RecipeNoteListItemSchema>;
 export type CreateRecipeNoteBody = z.infer<typeof CreateRecipeNoteSchema>;
+export type RecipeNoteProjectionColumn = z.infer<
+	typeof RecipeNoteProjectionColumnSchema
+>;
+export type ProjectRecipeNotesBody = z.infer<typeof ProjectRecipeNotesSchema>;
+export type RecipeNoteProjectionCell = string | null;
+export type RecipeNoteProjectionResult = {
+	columns: RecipeNoteProjectionColumn[];
+	rows: RecipeNoteProjectionCell[][];
+};
 
 export type CreateRecipeNote = CreateRecipeNoteBody & {
 	account_id: string;
@@ -62,6 +88,16 @@ type RecipeNoteRow = {
 	recipe_id: string | null;
 	recipe_name: string | null;
 };
+
+const recipeNoteProjectionColumns: Record<RecipeNoteProjectionColumn, string> =
+	{
+		recipe_note_id: "recipenoteid",
+		photo: "photo",
+		note: "note",
+		account_id: "accountid",
+		creation_date: "creationdate",
+		modification_date: "modificationdate",
+	};
 
 @Injectable()
 export class RecipeNotesService {
@@ -175,6 +211,29 @@ export class RecipeNotesService {
 			WHERE RecipeNoteID = ${recipe_note_id}
 				AND AccountID = ${account_id};
 		`;
+	}
+
+	async project(
+		account_id: string,
+		body: ProjectRecipeNotesBody,
+	): Promise<RecipeNoteProjectionResult> {
+		const columns = body.columns;
+		const selectColumns = columns.flatMap((column, index) => [
+			index ? sql`,` : sql``,
+			sql`${sql(recipeNoteProjectionColumns[column])}`,
+		]);
+
+		const rows = await sql<Record<string, RecipeNoteProjectionCell>[]>`
+			SELECT ${selectColumns}
+			FROM RecipeNote
+			WHERE AccountID = ${account_id}
+			ORDER BY ModificationDate DESC;
+		`.values(); // return rows as an array of values for each column, instead of objects
+
+		return {
+			columns,
+			rows: rows.map((row) => [...row]),
+		};
 	}
 
 	private async loadRows(

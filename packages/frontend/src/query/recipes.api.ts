@@ -1,13 +1,18 @@
 import type {
 	CreateRecipeInput,
+	ListRecipesQuery,
 	Recipe,
 	RecipeItem,
 	UpdateRecipeInput,
 } from "./recipes.types";
 import { type ApiResponse, apiClient } from "./request.utils";
 
-export async function listRecipes(): Promise<RecipeItem[]> {
-	const response = await apiClient.get<ApiResponse<RecipeItem[]>>("/recipes");
+export async function listRecipes(
+	query: ListRecipesQuery,
+): Promise<RecipeItem[]> {
+	const response = await apiClient.get<ApiResponse<RecipeItem[]>>("/recipes", {
+		params: query,
+	});
 	return response.data.data;
 }
 

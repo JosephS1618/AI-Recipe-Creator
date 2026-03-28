@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { CurrentAccountId } from "./decorators/current-account-id";
 import {
 	CreateRecipeNoteDto,
+	ProjectRecipeNotesDto,
 	RecipeNotesService,
 	UpdateRecipeNoteDto,
 } from "./recipe-notes.service";
@@ -11,9 +12,12 @@ import {
 export class RecipeNotesController {
 	constructor(private readonly recipeNotesService: RecipeNotesService) {}
 
-	@Get("recipe-notes")
-	list(@CurrentAccountId() accountId: string) {
-		return this.recipeNotesService.list(accountId);
+	@Post("recipe-notes")
+	list(
+		@CurrentAccountId() accountId: string,
+		@Body() body: ProjectRecipeNotesDto,
+	) {
+		return this.recipeNotesService.project(accountId, body);
 	}
 
 	@Get("recipe-note/:recipeNoteId")

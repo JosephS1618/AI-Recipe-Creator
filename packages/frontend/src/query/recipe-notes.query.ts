@@ -10,13 +10,15 @@ import {
 import type {
 	CreateRecipeNoteInput,
 	RecipeNote,
+	RecipeNoteColumn,
 	UpdateRecipeNoteInput,
 } from "./recipe-notes.types";
 
-export function useGetRecipeNotes() {
+export function useGetRecipeNotes(columns: RecipeNoteColumn[]) {
 	return useQuery({
-		queryKey: ["recipe-notes"],
-		queryFn: listRecipeNotes,
+		queryKey: ["recipe-notes", columns],
+		queryFn: () => listRecipeNotes({ columns }),
+		enabled: columns.length > 0,
 	});
 }
 

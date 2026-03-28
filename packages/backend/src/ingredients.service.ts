@@ -36,6 +36,10 @@ export const IngredientNamesSchema = z.object({
 		.array(IngredientItemNameSchema)
 		.min(1, "At least one ingredient name is required"),
 });
+export const FrequentlyUsedIngredientSchema = z.object({
+	name: IngredientItemNameSchema,
+	count: z.string(),
+});
 const IngredientNutritionBatchSchema = z
 	.object({
 		ingredients: z.array(IngredientItemSchema).min(1),
@@ -43,6 +47,9 @@ const IngredientNutritionBatchSchema = z
 	.strict();
 export type IngredientItem = z.infer<typeof IngredientItemSchema>;
 export type IngredientNames = z.infer<typeof IngredientNamesSchema>;
+export type FrequentlyUsedIngredient = z.infer<
+	typeof FrequentlyUsedIngredientSchema
+>;
 export class IngredientItemDto extends createZodDto(IngredientItemSchema) {}
 export class IngredientNameDto extends createZodDto(IngredientNameSchema) {}
 export class IngredientNamesDto extends createZodDto(IngredientNamesSchema) {}
@@ -77,6 +84,35 @@ export class IngredientService {
 	async list(): Promise<IngredientItem[]> {
 		return sql<IngredientItem[]>`
 			SELECT * FROM Ingredient ORDER BY Name ASC;
+		`;
+	}
+
+	async frequentlyUsedIngredients(): Promise<FrequentlyUsedIngredient[]> {
+		return sql<FrequentlyUsedIngredient[]>`
+			SELECT
+				ri.IngredientName AS name,
+				COUNT(*) AS count
+			FROM
+				RecipeIngredient ri
+			GROUP BY
+				ri.IngredientName
+			HAVING
+				COUNT(*) > (
+					SELECT
+						AVG(count)
+					FROM
+						(
+							SELECT
+								COUNT(*) AS count
+							FROM
+								RecipeIngredient
+							GROUP BY
+								IngredientName
+						)
+				)
+			ORDER BY
+				count DESC,
+				ri.IngredientName ASC;
 		`;
 	}
 

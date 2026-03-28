@@ -31,6 +31,11 @@ export const RecipeItemSchema = z.object({
 	cost_in_cents: z.number().int(),
 	creation_date: z.string(),
 	modification_date: z.string(),
+	total_protein: z.number().optional(),
+});
+
+export const ListRecipesQuerySchema = z.object({
+	minTotalProtein: z.coerce.number().finite().optional(),
 });
 
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
