@@ -4,6 +4,8 @@ import {
 	addIngredient,
 	addIngredientByAi,
 	editIngredient,
+	type FrequentlyUsedIngredient,
+	getFrequentlyUsedIngredients,
 	getIngredients,
 	removeIngredient,
 } from "./ingredients.api";
@@ -11,6 +13,13 @@ import type { IngredientItem, IngredientNameInput } from "./ingredients.types";
 
 export const useFetchIngredients = () => {
 	return useQuery({ queryKey: ["ingredients"], queryFn: getIngredients });
+};
+
+export const useFetchFrequentlyUsedIngredients = () => {
+	return useQuery<FrequentlyUsedIngredient[]>({
+		queryKey: ["ingredients", "frequently-used"],
+		queryFn: getFrequentlyUsedIngredients,
+	});
 };
 
 export const useAddIngredient = () => {

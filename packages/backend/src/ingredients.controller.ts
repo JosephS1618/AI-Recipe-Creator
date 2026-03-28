@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
 
 import {
+	FrequentlyUsedIngredient,
 	IngredientItem,
 	IngredientItemDto,
 	IngredientNameDto,
@@ -14,6 +15,11 @@ export class IngredientController {
 	@Get("")
 	async list(): Promise<IngredientItem[]> {
 		return this.service.list();
+	}
+
+	@Get("/frequently-used")
+	async frequentlyUsedIngredients(): Promise<FrequentlyUsedIngredient[]> {
+		return this.service.frequentlyUsedIngredients();
 	}
 
 	@Post("/add")

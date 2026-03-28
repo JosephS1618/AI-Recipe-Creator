@@ -1,9 +1,23 @@
 import type { IngredientItem, IngredientNameInput } from "./ingredients.types";
 import { type ApiResponse, apiClient } from "./request.utils";
 
+export type FrequentlyUsedIngredient = {
+	name: string;
+	count: string;
+};
+
 export async function getIngredients(): Promise<IngredientItem[]> {
 	const response =
 		await apiClient.get<ApiResponse<IngredientItem[]>>("/ingredients");
+	return response.data.data;
+}
+
+export async function getFrequentlyUsedIngredients(): Promise<
+	FrequentlyUsedIngredient[]
+> {
+	const response = await apiClient.get<ApiResponse<FrequentlyUsedIngredient[]>>(
+		"/ingredients/frequently-used",
+	);
 	return response.data.data;
 }
 
