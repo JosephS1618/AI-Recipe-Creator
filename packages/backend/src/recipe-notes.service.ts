@@ -36,10 +36,35 @@ export const UpdateRecipeNoteSchema = CreateRecipeNoteSchema;
 
 export class UpdateRecipeNoteDto extends createZodDto(UpdateRecipeNoteSchema) {}
 
+export const RecipeNoteProjectionColumnSchema = z.enum([
+	"recipe_note_id",
+	"photo",
+	"note",
+	"account_id",
+	"creation_date",
+	"modification_date",
+]);
+
+export const ProjectRecipeNotesSchema = z.object({
+	columns: z.array(RecipeNoteProjectionColumnSchema).min(1),
+});
+
+export class ProjectRecipeNotesDto extends createZodDto(
+	ProjectRecipeNotesSchema,
+) {}
+
 export type RecipeNoteRecipe = z.infer<typeof RecipeNoteRecipeSchema>;
 export type RecipeNote = z.infer<typeof RecipeNoteSchema>;
 export type RecipeNoteListItem = z.infer<typeof RecipeNoteListItemSchema>;
 export type CreateRecipeNoteBody = z.infer<typeof CreateRecipeNoteSchema>;
+export type RecipeNoteProjectionColumn = z.infer<
+	typeof RecipeNoteProjectionColumnSchema
+>;
+export type ProjectRecipeNotesBody = z.infer<typeof ProjectRecipeNotesSchema>;
+export type RecipeNoteProjectionResult = {
+	columns: RecipeNoteProjectionColumn[];
+	rows: (string | null)[][];
+};
 
 export type CreateRecipeNote = CreateRecipeNoteBody & {
 	account_id: string;
@@ -62,6 +87,16 @@ type RecipeNoteRow = {
 	recipe_id: string | null;
 	recipe_name: string | null;
 };
+
+const recipeNoteProjectionColumns: Record<RecipeNoteProjectionColumn, string> =
+	{
+		recipe_note_id: "recipenoteid",
+		photo: "photo",
+		note: "note",
+		account_id: "accountid",
+		creation_date: "creationdate",
+		modification_date: "modificationdate",
+	};
 
 @Injectable()
 export class RecipeNotesService {
@@ -175,6 +210,33 @@ export class RecipeNotesService {
 			WHERE RecipeNoteID = ${recipe_note_id}
 				AND AccountID = ${account_id};
 		`;
+	}
+
+	async project(
+		account_id: string,
+		body: ProjectRecipeNotesBody,
+	): Promise<RecipeNoteProjectionResult> {
+		const columns = body.columns;
+		const selectColumns = Object.fromEntries(
+			columns.map((column) => [
+				column,
+				sql(recipeNoteProjectionColumns[column]),
+			]),
+		);
+
+		// Use sql({ ..., modification_date: sql("modificationdate") }) to create
+		// column alias like `"modificationdate" AS "modification_date"` here
+		const rows = await sql<Record<string, string | null>[]>`
+			SELECT ${sql(selectColumns)}
+			FROM RecipeNote
+			WHERE AccountID = ${account_id}
+			ORDER BY ModificationDate DESC;
+		`;
+
+		return {
+			columns,
+			rows: rows.map((row) => columns.map((column) => row[column] ?? null)),
+		};
 	}
 
 	private async loadRows(

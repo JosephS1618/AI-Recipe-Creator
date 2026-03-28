@@ -16,6 +16,25 @@ export type RecipeNote = RecipeNoteListItem & {
 	recipes: RecipeNoteRecipe[];
 };
 
+export type RecipeNoteColumn =
+	| "recipe_note_id"
+	| "photo"
+	| "note"
+	| "account_id"
+	| "creation_date"
+	| "modification_date";
+
+export type RecipeNoteTableCell = string | null;
+
+export type RecipeNoteTableData = {
+	columns: RecipeNoteColumn[];
+	rows: RecipeNoteTableCell[][];
+};
+
+export type ListRecipeNotesInput = {
+	columns: RecipeNoteColumn[];
+};
+
 export type CreateRecipeNoteInput = {
 	note: string;
 	photo?: string | null;
