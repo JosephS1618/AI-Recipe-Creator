@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccountSession } from "@/components/account-provider";
+import { PostReaction } from "@/components/post-reaction";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -210,6 +211,12 @@ export const CommunityPost = () => {
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="space-y-2">{selectedPost.body}</div>
+							<div className="pt-4 border-t">
+								<PostReaction
+									postId={selectedPost.post_id}
+									userReaction={selectedPost.user_reaction}
+								/>
+							</div>
 						</CardContent>
 					</Card>
 				)}
