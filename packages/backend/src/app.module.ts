@@ -15,6 +15,8 @@ import { InventoriesController } from "./inventories.controller";
 import { InventoriesService } from "./inventories.service";
 import { InventoryItemsController } from "./inventoryItems.controller";
 import { InventoryItemsService } from "./inventoryItems.service";
+import { PostReactionController } from "./post-reaction.controller";
+import { PostReactionService } from "./post-reaction.service";
 import { ReceiptService } from "./receipt.service";
 import { RecipeNotesController } from "./recipe-notes.controller";
 import { RecipeNotesService } from "./recipe-notes.service";
@@ -40,6 +42,7 @@ import { UploadsService } from "./uploads.service";
 		IngredientController,
 		InventoriesController,
 		InventoryItemsController,
+		PostReactionController,
 		SubscriptionController,
 		UploadsController,
 		RecipesController,
@@ -54,6 +57,7 @@ import { UploadsService } from "./uploads.service";
 		CommunityPostService,
 		IngredientService,
 		InventoriesService,
+		PostReactionService,
 		ReceiptService,
 		InventoryItemsService,
 		SubscriptionService,
