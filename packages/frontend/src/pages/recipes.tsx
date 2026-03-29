@@ -4,6 +4,14 @@ import { toast } from "sonner";
 import { RecipeDialog } from "@/components/recipe-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -26,9 +34,28 @@ const formatCost = (cost?: number | null) =>
 
 export const Recipes = () => {
 	const [displayDialog, setDisplayDialog] = useState(false);
+	const [proteinLevel, setProteinLevel] = useState("proteinLevelNotSelected");
 	const navigate = useNavigate();
 
-	const recipesResult = useGetRecipes();
+	let minTotalProtein: number | undefined;
+
+	if (proteinLevel === "proteinOver5") {
+		minTotalProtein = 5;
+	}
+	if (proteinLevel === "proteinOver10") {
+		minTotalProtein = 10;
+	}
+	if (proteinLevel === "proteinOver20") {
+		minTotalProtein = 20;
+	}
+	if (proteinLevel === "proteinOver30") {
+		minTotalProtein = 30;
+	}
+
+	const recipesResult = useGetRecipes(
+		minTotalProtein !== undefined ? { minTotalProtein } : undefined,
+	);
+
 	const recipes = recipesResult.data ?? [];
 
 	const createRecipe = useCreateRecipe();
@@ -92,7 +119,32 @@ export const Recipes = () => {
 			</div>
 			<Card>
 				<CardHeader>
-					<CardTitle>Recipes</CardTitle>
+					<CardTitle>Recipe List</CardTitle>
+					<div className="mt-2 mb-2 flex items-center justify-end">
+						<Label htmlFor="protein-dropdown" className="pr-4">
+							Filter by Protein Level:{" "}
+						</Label>
+						<Select value={proteinLevel} onValueChange={setProteinLevel}>
+							<SelectTrigger id="protein-dropdown" className="w-56">
+								<SelectValue placeholder="Filter by protein" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="proteinLevelNotSelected">
+									All recipes
+								</SelectItem>
+								<SelectItem value="proteinOver5">over 5g of Protein</SelectItem>
+								<SelectItem value="proteinOver10">
+									over 10g of Protein
+								</SelectItem>
+								<SelectItem value="proteinOver20">
+									over 20g of Protein
+								</SelectItem>
+								<SelectItem value="proteinOver30">
+									over 30g of Protein
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</CardHeader>
 				<CardContent>
 					{sortedRecipes.length === 0 ? (
