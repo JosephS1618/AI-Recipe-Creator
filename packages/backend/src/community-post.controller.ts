@@ -9,8 +9,8 @@ export class CommunityPostController {
 	constructor(private readonly service: CommunityPostService) {}
 
 	@Get("posts")
-	list() {
-		return this.service.list();
+	list(@CurrentAccountId() accountId?: string) {
+		return this.service.list(accountId);
 	}
 
 	@Post("posts/create")

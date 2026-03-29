@@ -8,6 +8,7 @@ export const CommunityPostItemSchema = z.object({
 	visibility: z.enum(["private", "public"]),
 	account_id: z.string().uuid(),
 	recipe_id: z.string().uuid().nullable(),
+	user_reaction: z.string().nullable().optional(),
 });
 
 export const CommunityPostBodySchema = z.object({
