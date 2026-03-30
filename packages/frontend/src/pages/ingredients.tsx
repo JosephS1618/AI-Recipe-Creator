@@ -1,4 +1,6 @@
+import { BadgeCheck } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,11 +18,17 @@ import {
 	useAddIngredient,
 	useAddIngredientByAi,
 	useEditIngredient,
+	useFetchFrequentlyUsedIngredients,
 	useFetchIngredients,
 	useRemoveIngredient,
 } from "@/query";
 
-function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
+type Props = {
+	ingredient: IngredientItem;
+	frequentlyUsedIngredients: { name: string; count: number }[];
+};
+
+function IngredientListItem({ ingredient, frequentlyUsedIngredients }: Props) {
 	const removeIngredient = useRemoveIngredient();
 	const editIngredient = useEditIngredient();
 
@@ -30,9 +38,27 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 
 	const [updateMessage, setUpdateMessage] = useState("");
 
+	const isFrequenlyUsed = frequentlyUsedIngredients.some(
+		(i) => i.name === ingredient.name,
+	);
+
 	return (
 		<TableRow>
-			<TableCell>{ingredient.name}</TableCell>
+			<TableCell>
+				<div className="flex items-center gap-2">
+					<span>{ingredient.name}</span>
+					{isFrequenlyUsed && (
+						// https://ui.shadcn.com/docs/components/base/badge
+						<Badge
+							className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+							variant="secondary"
+						>
+							<BadgeCheck data-icon="inline-start" />
+							Used Often
+						</Badge>
+					)}
+				</div>
+			</TableCell>
 
 			<TableCell>
 				<Input
@@ -110,11 +136,25 @@ function IngredientListItem({ ingredient }: { ingredient: IngredientItem }) {
 
 function IngredientsList() {
 	const { data: ingredients = [] } = useFetchIngredients();
+	const { data: frequentlyUsedIngredients = [] } =
+		useFetchFrequentlyUsedIngredients();
+
+	console.log(frequentlyUsedIngredients);
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Ingredients</CardTitle>
+				<CardTitle>List of Available Ingredients</CardTitle>
+				<p className="text-sm text-muted-foreground">
+					Items used more frequently are marked with{" "}
+					<Badge
+						className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+						variant="secondary"
+					>
+						<BadgeCheck data-icon="inline-start" />
+						Used Often
+					</Badge>
+				</p>
 			</CardHeader>
 
 			<CardContent>
@@ -139,6 +179,7 @@ function IngredientsList() {
 								<IngredientListItem
 									key={ingredient.name}
 									ingredient={ingredient}
+									frequentlyUsedIngredients={frequentlyUsedIngredients}
 								/>
 							))}
 						</TableBody>
@@ -229,7 +270,7 @@ function AddIngredient() {
 							)
 						}
 					>
-						{addIngredient.isPending ? "Adding..." : "Add Ingredient"}
+						Add Ingredient
 					</Button>
 				</div>
 			</CardContent>
