@@ -14,12 +14,16 @@ import type {
 	CreateInventoryItemsFromReceiptResult,
 	DeleteInventoryItem,
 	InventoryItem,
+	InventoryItemFilter,
 } from "./inventoryItems.types";
 
-export function useGetInventoryItems(inventoryId: string) {
+export function useGetInventoryItems(
+	inventoryId: string,
+	filters: InventoryItemFilter[] = [],
+) {
 	return useQuery({
-		queryKey: ["inventoryItems", inventoryId],
-		queryFn: () => getInventoryItems(inventoryId),
+		queryKey: ["inventoryItems", inventoryId, filters],
+		queryFn: () => getInventoryItems(inventoryId, filters),
 	});
 }
 
@@ -78,6 +82,7 @@ export const useEditInventoryItem = () => {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: ["inventoryItems", variables.inventoryId],
+				refetchType: "all",
 			});
 		},
 	});

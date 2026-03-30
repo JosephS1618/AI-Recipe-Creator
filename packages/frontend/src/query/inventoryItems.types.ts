@@ -8,6 +8,19 @@ export type InventoryItem = {
 	receipt_id: string | null;
 };
 
+export type InventoryItemFilterAttribute =
+	| "ingredient_name"
+	| "quantity"
+	| "creation_date"
+	| "expiration_date"
+	| "receipt_id";
+
+export type InventoryItemFilter = {
+	attribute: InventoryItemFilterAttribute;
+	value: string;
+	isOR?: boolean;
+};
+
 export type CreateInventoryItem = {
 	quantity: number;
 	creation_date: string;

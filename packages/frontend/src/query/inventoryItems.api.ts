@@ -4,15 +4,18 @@ import type {
 	CreateInventoryItemsFromReceiptResult,
 	DeleteInventoryItem,
 	InventoryItem,
+	InventoryItemFilter,
 } from "./inventoryItems.types";
 
 import { type ApiResponse, apiClient } from "./request.utils";
 
 export async function getInventoryItems(
 	inventoryId: string,
+	filters: InventoryItemFilter[] = [],
 ): Promise<InventoryItem[]> {
-	const response = await apiClient.get<ApiResponse<InventoryItem[]>>(
+	const response = await apiClient.post<ApiResponse<InventoryItem[]>>(
 		`/inventory/${inventoryId}/items`,
+		{ filters },
 	);
 
 	return response.data.data;

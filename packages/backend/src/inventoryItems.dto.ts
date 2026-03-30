@@ -5,6 +5,7 @@ import {
 	EditInventoryItemSchema,
 	InventoryItemBodySchema,
 	InventoryItemSchema,
+	SelectInventoryItemsSchema,
 } from "./inventoryItems.types";
 
 export class InventoryItemDto extends createZodDto(InventoryItemSchema) {}
@@ -17,4 +18,7 @@ export class EditInventoryItemDto extends createZodDto(
 ) {}
 export class DeleteInventoryItemDto extends createZodDto(
 	DeleteInventoryItemSchema,
+) {}
+export class SelectInventoryItemsDto extends createZodDto(
+	SelectInventoryItemsSchema,
 ) {}

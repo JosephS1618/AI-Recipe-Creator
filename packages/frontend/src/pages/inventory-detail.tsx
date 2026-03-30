@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
+import { InventoryFilters } from "@/components/inventory-filters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { UploadButton } from "@/components/upload-button";
 import {
 	type DeleteInventoryItem,
 	type InventoryItem,
+	type InventoryItemFilter,
 	useAddInventoryItem,
 	useAddInventoryItemsFromReceipt,
 	useEditInventoryItem,
@@ -129,9 +131,8 @@ function InventoryItemList({
 }
 
 function InventoryItemsList({ inventoryId }: { inventoryId: string }) {
-	const { data: itemsData } = useGetInventoryItems(inventoryId);
-
-	const items = Array.isArray(itemsData) ? itemsData : [];
+	const [filters, setFilters] = useState<InventoryItemFilter[]>([]);
+	const { data: items = [] } = useGetInventoryItems(inventoryId, filters);
 
 	return (
 		<Card>
@@ -140,6 +141,10 @@ function InventoryItemsList({ inventoryId }: { inventoryId: string }) {
 			</CardHeader>
 
 			<CardContent>
+				<InventoryFilters filters={filters} onChange={setFilters} />
+
+				<hr className="mt-4" />
+
 				{items.length === 0 ? (
 					<p className="text-sm text-muted-foreground">
 						Added inventory items will show up here

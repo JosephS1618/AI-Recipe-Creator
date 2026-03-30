@@ -22,10 +22,32 @@ export const DeleteInventoryItemSchema = z.object({
 	inventory_item_id: z.number().int(),
 });
 
+export const InventoryItemFilterAttributeSchema = z.enum([
+	"ingredient_name",
+	"quantity",
+	"creation_date",
+	"expiration_date",
+	"receipt_id",
+]);
+
+export const InventoryItemFilterSchema = z.object({
+	attribute: InventoryItemFilterAttributeSchema,
+	value: z.string(),
+	isOR: z.boolean().optional(),
+});
+
+export const SelectInventoryItemsSchema = z.object({
+	filters: z.array(InventoryItemFilterSchema).default([]),
+});
+
 export type InventoryItem = z.infer<typeof InventoryItemSchema>;
 export type InventoryItemBody = z.infer<typeof InventoryItemBodySchema>;
 export type EditInventoryItemBody = z.infer<typeof EditInventoryItemSchema>;
 export type DeleteInventoryItem = z.infer<typeof DeleteInventoryItemSchema>;
+export type InventoryItemFilter = z.infer<typeof InventoryItemFilterSchema>;
+export type SelectInventoryItemsBody = z.infer<
+	typeof SelectInventoryItemsSchema
+>;
 
 export type CreateInventoryItem = InventoryItemBody & {
 	inventory_id: string;

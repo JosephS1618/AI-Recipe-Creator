@@ -4,12 +4,17 @@ import {
 	type DeleteInventoryItem,
 	type EditInventoryItem,
 	type InventoryItem,
+	type InventoryItemFilter,
+	type SelectInventoryItemsBody,
 } from "./inventoryItems.types";
 import { sql } from "./sql";
 
 @Injectable()
 export class InventoryItemsService {
-	async list(inventory_id: string): Promise<InventoryItem[]> {
+	async list(
+		inventory_id: string,
+		body: SelectInventoryItemsBody = { filters: [] },
+	): Promise<InventoryItem[]> {
 		return sql<InventoryItem[]>`
 			SELECT
 				InventoryItemID AS inventory_item_id,
@@ -21,8 +26,38 @@ export class InventoryItemsService {
 				ReceiptID AS receipt_id
 			FROM InventoryItem
 			WHERE InventoryID = ${inventory_id}
+			${this.buildConditions(body.filters)}
 			ORDER BY InventoryItemID;
 		`;
+	}
+
+	private buildConditions(filters: InventoryItemFilter[]) {
+		if (filters.length === 0) {
+			return sql``;
+		}
+
+		let clause = this.buildCondition(filters[0]);
+
+		for (const filter of filters.slice(1)) {
+			clause = sql`${clause}${filter.isOR ? sql` OR ` : sql` AND `}${this.buildCondition(filter)}`;
+		}
+
+		return sql` AND (${clause})`;
+	}
+
+	private buildCondition(filter: InventoryItemFilter) {
+		switch (filter.attribute) {
+			case "ingredient_name":
+				return sql`IngredientName = ${filter.value}`;
+			case "quantity":
+				return sql`Quantity = ${filter.value}`;
+			case "creation_date":
+				return sql`DATE(CreationDate) = ${filter.value}`;
+			case "expiration_date":
+				return sql`DATE(ExpirationDate) = ${filter.value}`;
+			case "receipt_id":
+				return sql`ReceiptID = ${filter.value}`;
+		}
 	}
 
 	async add(item: CreateInventoryItem): Promise<InventoryItem> {

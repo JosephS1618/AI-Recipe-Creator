@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Param, Post } from "@nestjs/common";
 
 import { CurrentAccountId } from "./decorators/current-account-id";
 import {
 	CreateInventoryItemDto,
 	DeleteInventoryItemDto,
 	EditInventoryItemDto,
+	SelectInventoryItemsDto,
 } from "./inventoryItems.dto";
 import { InventoryItemsService } from "./inventoryItems.service";
 import {
@@ -20,9 +21,12 @@ export class InventoryItemsController {
 		private readonly inventoryItemsService: InventoryItemsService,
 	) {}
 
-	@Get()
-	async list(@Param("inventoryId") inventoryId: string) {
-		return this.inventoryItemsService.list(inventoryId);
+	@Post()
+	async list(
+		@Param("inventoryId") inventoryId: string,
+		@Body() body: SelectInventoryItemsDto,
+	) {
+		return this.inventoryItemsService.list(inventoryId, body);
 	}
 
 	@Post("create")
