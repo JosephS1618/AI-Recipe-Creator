@@ -18,17 +18,21 @@ import {
 	useAddIngredient,
 	useAddIngredientByAi,
 	useEditIngredient,
-	useFetchFrequentlyUsedIngredients,
 	useFetchIngredients,
 	useRemoveIngredient,
 } from "@/query";
 
+import { getFrequentlyUsedIngredients } from "@/query/ingredients.api";
+
 type Props = {
 	ingredient: IngredientItem;
-	frequentlyUsedIngredients: { name: string; count: string }[];
+	frequentlyUsedIngredientsSet: Set<string>;
 };
 
-function IngredientListItem({ ingredient, frequentlyUsedIngredients }: Props) {
+function IngredientListItem({
+	ingredient,
+	frequentlyUsedIngredientsSet,
+}: Props) {
 	const removeIngredient = useRemoveIngredient();
 	const editIngredient = useEditIngredient();
 
@@ -38,9 +42,7 @@ function IngredientListItem({ ingredient, frequentlyUsedIngredients }: Props) {
 
 	const [updateMessage, setUpdateMessage] = useState("");
 
-	const isFrequenlyUsed = frequentlyUsedIngredients.some(
-		(i) => i.name === ingredient.name,
-	);
+	const isFrequenlyUsed = frequentlyUsedIngredientsSet.has(ingredient.name);
 
 	return (
 		<TableRow>
@@ -136,23 +138,44 @@ function IngredientListItem({ ingredient, frequentlyUsedIngredients }: Props) {
 
 function IngredientsList() {
 	const { data: ingredients = [] } = useFetchIngredients();
-	const { data: frequentlyUsedIngredients = [] } =
-		useFetchFrequentlyUsedIngredients();
+	const [frequentlyUsedIngredientsSet, setFrequentlyUsedIngredientsSet] =
+		useState<Set<string>>(new Set());
+	const [clickedShowOftenUsed, setClickedShowOftenUsed] = useState(false);
 
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>List of Available Ingredients</CardTitle>
-				<p className="text-sm text-muted-foreground">
-					Items used more frequently are marked with{" "}
-					<Badge
-						className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-						variant="secondary"
-					>
-						<BadgeCheck data-icon="inline-start" />
-						Used Often
-					</Badge>
-				</p>
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle>List of Available Ingredients</CardTitle>
+						{clickedShowOftenUsed && (
+							<p className="mt-1 text-sm text-muted-foreground">
+								Items used more frequently are marked with{" "}
+								<Badge
+									className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+									variant="secondary"
+								>
+									<BadgeCheck data-icon="inline-start" />
+									Used Often
+								</Badge>
+							</p>
+						)}
+					</div>
+					{!clickedShowOftenUsed && (
+						<Button
+							variant="outline"
+							onClick={async () => {
+								const data = await getFrequentlyUsedIngredients();
+								setFrequentlyUsedIngredientsSet(
+									new Set(data.map((ingredient) => ingredient.name)),
+								);
+								setClickedShowOftenUsed(true);
+							}}
+						>
+							View Ingredients Used More Often
+						</Button>
+					)}
+				</div>
 			</CardHeader>
 
 			<CardContent>
@@ -177,7 +200,7 @@ function IngredientsList() {
 								<IngredientListItem
 									key={ingredient.name}
 									ingredient={ingredient}
-									frequentlyUsedIngredients={frequentlyUsedIngredients}
+									frequentlyUsedIngredientsSet={frequentlyUsedIngredientsSet}
 								/>
 							))}
 						</TableBody>
