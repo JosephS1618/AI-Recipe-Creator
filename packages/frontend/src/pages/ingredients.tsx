@@ -25,7 +25,7 @@ import {
 
 type Props = {
 	ingredient: IngredientItem;
-	frequentlyUsedIngredients: { name: string; count: number }[];
+	frequentlyUsedIngredients: { name: string; count: string }[];
 };
 
 function IngredientListItem({ ingredient, frequentlyUsedIngredients }: Props) {
@@ -138,8 +138,6 @@ function IngredientsList() {
 	const { data: ingredients = [] } = useFetchIngredients();
 	const { data: frequentlyUsedIngredients = [] } =
 		useFetchFrequentlyUsedIngredients();
-
-	console.log(frequentlyUsedIngredients);
 
 	return (
 		<Card>
