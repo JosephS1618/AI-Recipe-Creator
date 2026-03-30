@@ -2,6 +2,7 @@ import type {
 	CreateRecipeInput,
 	ListRecipesQuery,
 	Recipe,
+	RecipeDivisionIngredient,
 	RecipeItem,
 	UpdateRecipeInput,
 } from "./recipes.types";
@@ -13,6 +14,15 @@ export async function listRecipes(
 	const response = await apiClient.get<ApiResponse<RecipeItem[]>>("/recipes", {
 		params: query,
 	});
+	return response.data.data;
+}
+
+export async function listIngredientsUsedInAllRecipes(): Promise<
+	RecipeDivisionIngredient[]
+> {
+	const response = await apiClient.get<ApiResponse<RecipeDivisionIngredient[]>>(
+		"/recipes/ingredients-used-in-all-recipes",
+	);
 	return response.data.data;
 }
 

@@ -4,6 +4,7 @@ import {
 	deleteRecipe,
 	generateAiRecipe,
 	getRecipe,
+	listIngredientsUsedInAllRecipes,
 	listRecipes,
 	updateRecipe,
 } from "./recipes.api";
@@ -11,6 +12,7 @@ import type {
 	CreateRecipeInput,
 	ListRecipesQuery,
 	Recipe,
+	RecipeDivisionIngredient,
 	UpdateRecipeInput,
 } from "./recipes.types";
 
@@ -18,6 +20,14 @@ export function useGetRecipes(query: ListRecipesQuery = {}) {
 	return useQuery({
 		queryKey: ["recipes", query],
 		queryFn: () => listRecipes(query),
+	});
+}
+
+export function useGetIngredientsUsedInAllRecipes() {
+	return useQuery<RecipeDivisionIngredient[], Error>({
+		queryKey: ["recipes", "ingredients-used-in-all-recipes"],
+		queryFn: listIngredientsUsedInAllRecipes,
+		enabled: false,
 	});
 }
 

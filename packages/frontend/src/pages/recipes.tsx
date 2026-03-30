@@ -24,6 +24,7 @@ import {
 	type CreateRecipeInput,
 	useCreateRecipe,
 	useGenerateAiRecipe,
+	useGetIngredientsUsedInAllRecipes,
 	useGetRecipes,
 } from "@/query";
 
@@ -52,17 +53,16 @@ export const Recipes = () => {
 		minTotalProtein = 30;
 	}
 
-	const recipesResult = useGetRecipes(
+	const { data: recipes = [] } = useGetRecipes(
 		minTotalProtein !== undefined ? { minTotalProtein } : undefined,
 	);
-
-	const recipes = recipesResult.data ?? [];
+	const {
+		data: ingredientsUsedInAllRecipes = [],
+		refetch: fetchIngredientsUsedInAllRecipes,
+	} = useGetIngredientsUsedInAllRecipes();
 
 	const createRecipe = useCreateRecipe();
 	const generateAiRecipe = useGenerateAiRecipe();
-	const sortedRecipes = [...recipes].sort((a, b) =>
-		a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-	);
 
 	const handleCreateRecipe = (data: CreateRecipeInput) => {
 		const recipeName = data.name.trim();
@@ -117,6 +117,7 @@ export const Recipes = () => {
 					<Button onClick={() => setDisplayDialog(true)}>Create Recipe</Button>
 				</div>
 			</div>
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Recipe List</CardTitle>
@@ -147,7 +148,7 @@ export const Recipes = () => {
 					</div>
 				</CardHeader>
 				<CardContent>
-					{sortedRecipes.length === 0 ? (
+					{recipes.length === 0 ? (
 						<p className="text-sm text-muted-foreground">No Recipes Found</p>
 					) : (
 						<Table>
@@ -162,7 +163,7 @@ export const Recipes = () => {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{sortedRecipes.map((recipe) => (
+								{recipes.map((recipe) => (
 									<TableRow key={recipe.recipe_id}>
 										<TableCell>
 											<Link
@@ -186,6 +187,25 @@ export const Recipes = () => {
 					)}
 				</CardContent>
 			</Card>
+
+			<Card>
+				<CardContent className="space-y-4">
+					<Button
+						variant="outline"
+						onClick={() => fetchIngredientsUsedInAllRecipes()}
+					>
+						Find Ingredients Used In All Recipes
+					</Button>
+					<ul className="list-disc pl-6">
+						{ingredientsUsedInAllRecipes.map((ingredient) => (
+							<li key={ingredient.ingredient_name}>
+								{ingredient.ingredient_name}
+							</li>
+						))}
+					</ul>
+				</CardContent>
+			</Card>
+
 			<RecipeDialog
 				openRecipeDialog={displayDialog}
 				toggleOpenRecipeDialog={setDisplayDialog}

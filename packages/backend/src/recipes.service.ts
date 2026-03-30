@@ -11,21 +11,48 @@ import { sql } from "./sql";
 
 @Injectable()
 export class RecipesService {
-	async list(): Promise<RecipeItem[]> {
+	async list(account_id: string): Promise<RecipeItem[]> {
 		const recipes = await sql<RecipeItem[]>`
-				SELECT
-					RecipeID AS recipe_id,
-					Name AS name,
-					Content AS content,
-					Cuisine AS cuisine,
-					Time AS time,
-					CostInCents AS cost_in_cents,
-					CreationDate AS creation_date,
-					ModificationDate AS modification_date
-				FROM Recipe
-				ORDER BY Name ASC;
-			`;
+			SELECT
+				RecipeID AS recipe_id,
+				Name AS name,
+				Content AS content,
+				Cuisine AS cuisine,
+				Time AS time,
+				CostInCents AS cost_in_cents,
+				CreationDate AS creation_date,
+				ModificationDate AS modification_date
+			FROM Recipe
+			WHERE AccountID = ${account_id}
+			ORDER BY Name ASC;
+		`;
 		return recipes;
+	}
+
+	async listIngredientsUsedInAllRecipes(
+		account_id: string,
+	): Promise<Pick<RecipeIngredient, "ingredient_name">[]> {
+		return sql<Pick<RecipeIngredient, "ingredient_name">[]>`
+			SELECT
+				i.Name AS ingredient_name
+			FROM Ingredient i
+			WHERE EXISTS (
+				SELECT *
+				FROM Recipe r
+				WHERE r.AccountID = ${account_id}
+			)
+			AND NOT EXISTS (
+				SELECT *
+				FROM Recipe r
+				WHERE r.AccountID = ${account_id}
+					AND NOT EXISTS (
+					SELECT *
+					FROM RecipeIngredient ri
+					WHERE ri.RecipeID = r.RecipeID
+						AND ri.IngredientName = i.Name
+				)
+			);
+		`;
 	}
 
 	async get(recipe_id: string): Promise<Recipe> {
@@ -174,7 +201,10 @@ export class RecipesService {
 		`;
 	}
 
-	async listWithMinTotalProtein(target: number): Promise<RecipeItem[]> {
+	async listWithMinTotalProtein(
+		account_id: string,
+		target: number,
+	): Promise<RecipeItem[]> {
 		return sql<RecipeItem[]>`
 			SELECT
 				r.RecipeID AS recipe_id,
@@ -192,6 +222,7 @@ export class RecipesService {
 				Ingredient i
 			WHERE
 				r.RecipeID = ri.RecipeID
+				AND r.AccountID = ${account_id}
 				AND ri.IngredientName = i.Name
 			GROUP BY
 				r.RecipeID

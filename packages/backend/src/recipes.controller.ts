@@ -17,12 +17,23 @@ export class RecipesController {
 	) {}
 
 	@Get("recipes")
-	list(@Query() query: ListRecipesQueryDto) {
+	list(
+		@CurrentAccountId() accountId: string,
+		@Query() query: ListRecipesQueryDto,
+	) {
 		if (query.minTotalProtein !== undefined) {
-			return this.recipesService.listWithMinTotalProtein(query.minTotalProtein);
+			return this.recipesService.listWithMinTotalProtein(
+				accountId,
+				query.minTotalProtein,
+			);
 		} else {
-			return this.recipesService.list();
+			return this.recipesService.list(accountId);
 		}
+	}
+
+	@Get("recipes/ingredients-used-in-all-recipes")
+	listIngredientsUsedInAllRecipes(@CurrentAccountId() accountId: string) {
+		return this.recipesService.listIngredientsUsedInAllRecipes(accountId);
 	}
 
 	@Post("recipe/create")

@@ -3,6 +3,10 @@ export type RecipeIngredient = {
 	quantity: number;
 };
 
+export type RecipeDivisionIngredient = {
+	ingredient_name: string;
+};
+
 export type Recipe = {
 	recipe_id: string;
 	account_id: string;
