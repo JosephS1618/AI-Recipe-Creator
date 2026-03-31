@@ -3,8 +3,6 @@ export type Inventory = {
 	name: string;
 	description: string;
 	type: string;
-	ownerAccountId: string;
-	ownerUsername: string;
 };
 
 export type CreateInventoryInput = {

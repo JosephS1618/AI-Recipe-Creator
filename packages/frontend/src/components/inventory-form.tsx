@@ -29,32 +29,8 @@ export function InventoryForm({
 	);
 	const [type, setType] = useState(initialData?.type || "");
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-
-		if (!name.trim() || !type.trim()) {
-			alert("Please fill in required fields (Name and Type)");
-			return;
-		}
-
-		if (mode === "create") {
-			onSubmit({
-				name: name.trim(),
-				description: description.trim(),
-				type: type.trim(),
-			} as CreateInventoryInput);
-		} else {
-			onSubmit({
-				id: initialData?.inventoryid || "",
-				name: name.trim(),
-				description: description.trim(),
-				type: type.trim(),
-			} as UpdateInventoryInput);
-		}
-	};
-
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form className="space-y-4">
 			<div className="grid gap-2">
 				<Label htmlFor="name">Inventory Name *</Label>
 				<Input
@@ -93,12 +69,20 @@ export function InventoryForm({
 			</div>
 
 			<div className="pt-4 flex gap-2 justify-end">
-				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting
-						? "Saving..."
-						: mode === "create"
-							? "Create Inventory"
-							: "Update Inventory"}
+				<Button
+					type="button"
+					className="capitalize"
+					onClick={() =>
+						onSubmit({
+							id: initialData?.inventoryid || "",
+							name: name.trim(),
+							description: description.trim(),
+							type: type.trim(),
+						})
+					}
+					disabled={isSubmitting || !name.trim() || !type.trim()}
+				>
+					{`${mode} inventory`}
 				</Button>
 			</div>
 		</form>

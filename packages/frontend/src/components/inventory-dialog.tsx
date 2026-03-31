@@ -35,9 +35,6 @@ export function InventoryDialog({
 		data: CreateInventoryInput | UpdateInventoryInput,
 	) => {
 		onSubmit(data);
-		if (!isSubmitting) {
-			onOpenChange(false);
-		}
 	};
 
 	const isCreateMode = mode === "create";
@@ -55,6 +52,7 @@ export function InventoryDialog({
 				</DialogHeader>
 
 				<InventoryForm
+					key={`${mode}-${selectedInventory?.inventoryid}-${isOpen}`}
 					mode={mode}
 					initialData={selectedInventory}
 					onSubmit={handleFormSubmit}

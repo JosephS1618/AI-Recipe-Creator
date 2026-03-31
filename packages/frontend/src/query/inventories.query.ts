@@ -26,6 +26,7 @@ export const useGetCoOwners = (inventoryId: string) => {
 	return useQuery({
 		queryKey: ["coOwners", inventoryId],
 		queryFn: () => getCoOwners(inventoryId),
+		enabled: !!inventoryId,
 	});
 };
 

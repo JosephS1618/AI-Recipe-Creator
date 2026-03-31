@@ -25,7 +25,7 @@ export function SharedUsersList({
 				{coOwners.map((coOwner) => (
 					<div
 						key={coOwner.accountid}
-						className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50"
+						className="flex items-center justify-between p-3 border-b last:border-b-0"
 					>
 						<div className="flex flex-col min-w-0">
 							<p className="text-sm font-medium text-gray-900">
@@ -34,19 +34,13 @@ export function SharedUsersList({
 							<p className="text-xs text-gray-500 truncate">{coOwner.email}</p>
 						</div>
 						<div className="flex items-center gap-2 ml-2">
-							{coOwner.accountid === currentAccountId && (
-								<span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-									You
-								</span>
-							)}
 							<Button
-								variant="ghost"
+								variant="outline"
 								size="sm"
 								onClick={() => onUnshare(coOwner.accountid)}
 								disabled={isLoading}
-								className="text-red-600 hover:text-red-700 hover:bg-red-50"
 							>
-								Unshare
+								{coOwner.accountid === currentAccountId ? "Leave" : "Remove"}
 							</Button>
 						</div>
 					</div>
