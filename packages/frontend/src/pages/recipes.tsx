@@ -168,7 +168,7 @@ export const Recipes = () => {
 										<TableCell>
 											<Link
 												to={`/recipes/${recipe.recipe_id}`}
-												className="hover:font-semibold"
+												className="hover:underline"
 											>
 												{recipe.name}
 											</Link>

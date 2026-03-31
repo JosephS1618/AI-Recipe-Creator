@@ -24,7 +24,6 @@ export function SubscriptionDialog({
 	onOpenChange: (open: boolean) => void;
 	onSuccess?: () => void;
 }) {
-	const navigate = useNavigate();
 	const { saveCurrentUser } = useAccountSession();
 	const subscribeMutation = useSubscribe();
 	const [selectedType, setSelectedType] = useState<SubscriptionType | null>(
@@ -40,20 +39,10 @@ export function SubscriptionDialog({
 				onSuccess: (user) => {
 					saveCurrentUser(user);
 					onSuccess?.();
-					// Redirect to login after successful subscription
-					navigate("/login");
 				},
 			},
 		);
 	}
-
-	const displaySubscriptions = subscriptions.sort((a, b) => {
-		// Display monthly first, then yearly
-		if (a.subscriptionType === "monthly" && b.subscriptionType === "yearly") {
-			return -1;
-		}
-		return 0;
-	});
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -68,13 +57,13 @@ export function SubscriptionDialog({
 				<div className="grid gap-4 py-4">
 					<div className="text-sm font-medium">Select Plan</div>
 
-					{displaySubscriptions.length === 0 ? (
+					{subscriptions.length === 0 ? (
 						<div className="text-sm text-muted-foreground">
 							No subscription plans available.
 						</div>
 					) : (
 						<div className="grid gap-3">
-							{displaySubscriptions.map((subscription) => (
+							{subscriptions.map((subscription) => (
 								<div
 									key={subscription.subscriptionType}
 									className="flex items-center gap-3"
@@ -94,7 +83,7 @@ export function SubscriptionDialog({
 										htmlFor={`plan-${subscription.subscriptionType}`}
 										className="flex-1 cursor-pointer"
 									>
-										<div className="flex items-center justify-between">
+										<div className="flex items-center justify-between gap-1">
 											<div className="capitalize font-medium">
 												{subscription.subscriptionType === "monthly"
 													? "Monthly"
