@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { CreateCommunityPostDto } from "./community-post.dto";
 import { CommunityPostService } from "./community-post.service";
 
@@ -11,6 +11,11 @@ export class CommunityPostController {
 	@Get("posts")
 	list(@CurrentAccountId() accountId?: string) {
 		return this.service.list(accountId);
+	}
+
+	@Get("posts/search")
+	search(@Query("recipeName") recipeName: string) {
+		return this.service.searchByRecipeName(recipeName);
 	}
 
 	@Post("posts/create")

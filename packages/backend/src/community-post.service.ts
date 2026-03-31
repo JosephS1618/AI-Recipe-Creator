@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import type {
 	CommunityPostItem,
 	CreateCommunityPost,
+	PostSearchResult,
 } from "./community-post.types";
 import { sql } from "./sql";
 
@@ -67,6 +68,23 @@ export class CommunityPostService {
 				${post.account_id},
 				${post.recipe_id}
 			);
+		`;
+	}
+
+	async searchByRecipeName(recipeName: string): Promise<PostSearchResult[]> {
+		const searchParam = `%${recipeName}%`;
+		return sql<PostSearchResult[]>`
+			SELECT 
+				p.Title AS title,
+				p.Body AS body,
+				p.CreationDate AS creation_date,
+				a.Username AS username,
+				r.Name AS recipe_name
+			FROM Post p
+			JOIN Recipe r ON p.RecipeID = r.RecipeID
+			JOIN Account a ON p.AccountID = a.AccountID
+			WHERE p.Visibility = 'public' 
+			  AND r.Name ILIKE ${searchParam};
 		`;
 	}
 }
