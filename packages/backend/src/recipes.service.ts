@@ -184,6 +184,23 @@ export class RecipesService {
 		return this.get(recipe.recipe_id);
 	}
 
+	async calculateCalories(recipe_id: string): Promise<number | null> {
+		const [result] = await sql<{ total_calories: number | null }[]>`
+			SELECT 
+				ri.RecipeID,
+				SUM(((i.Protein * 4) + (i.Carbs * 4) + (i.Fat * 9)) * ri.Quantity) AS total_calories
+			FROM 
+				RecipeIngredient ri
+			JOIN 
+				Ingredient i ON ri.IngredientName = i.Name
+			WHERE 
+				ri.RecipeID = ${recipe_id}
+			GROUP BY 
+				ri.RecipeID;
+		`;
+		return result?.total_calories || null;
+	}
+
 	async remove(recipe_id: string, account_id: string): Promise<void> {
 		const [recipeFound] = await sql`
 			SELECT RecipeID

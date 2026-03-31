@@ -49,6 +49,11 @@ export class RecipesController {
 		return this.aiRecipeService.generate(accountId);
 	}
 
+	@Get("recipe/:recipeId/calories")
+	calories(@Param("recipeId") recipeId: string) {
+		return this.recipesService.calculateCalories(recipeId);
+	}
+
 	@Get("recipe/:recipeId")
 	get(@Param("recipeId") recipeId: string) {
 		return this.recipesService.get(recipeId);

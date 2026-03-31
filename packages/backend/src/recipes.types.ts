@@ -38,6 +38,8 @@ export const ListRecipesQuerySchema = z.object({
 	minTotalProtein: z.coerce.number().finite().optional(),
 });
 
+export const CalorieResponseSchema = z.number();
+
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
 export type RecipeBody = z.infer<typeof RecipeBodySchema>;
 export type Recipe = z.infer<typeof RecipeSchema>;
