@@ -33,6 +33,15 @@ export async function getRecipe(recipeId: string): Promise<Recipe> {
 	return response.data.data;
 }
 
+export async function getRecipeCalories(
+	recipeId: string,
+): Promise<number | null> {
+	const response = await apiClient.get<ApiResponse<number | null>>(
+		`/recipe/${recipeId}/calories`,
+	);
+	return response.data.data;
+}
+
 export async function createRecipe(data: CreateRecipeInput): Promise<Recipe> {
 	const response = await apiClient.post<ApiResponse<Recipe>>(
 		"/recipe/create",

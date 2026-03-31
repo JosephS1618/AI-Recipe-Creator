@@ -4,6 +4,7 @@ import {
 	deleteRecipe,
 	generateAiRecipe,
 	getRecipe,
+	getRecipeCalories,
 	listIngredientsUsedInAllRecipes,
 	listRecipes,
 	updateRecipe,
@@ -36,6 +37,14 @@ export function useGetRecipe(recipeId: string) {
 		queryKey: ["recipe", recipeId],
 		queryFn: () => getRecipe(recipeId),
 		enabled: Boolean(recipeId),
+	});
+}
+
+export function useGetRecipeCalories(recipeId: string) {
+	return useQuery<number | null, Error>({
+		queryKey: ["recipe", recipeId, "calories"],
+		queryFn: () => getRecipeCalories(recipeId),
+		enabled: false,
 	});
 }
 

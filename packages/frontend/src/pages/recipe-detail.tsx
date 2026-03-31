@@ -13,7 +13,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useDeleteRecipe, useGetRecipe, useUpdateRecipe } from "@/query";
+import {
+	useDeleteRecipe,
+	useGetRecipe,
+	useGetRecipeCalories,
+	useUpdateRecipe,
+} from "@/query";
 
 const formatDate = (date?: string | null) => (date ? date.slice(0, 10) : "—");
 
@@ -28,6 +33,8 @@ export const RecipeDetailPage = () => {
 	const [recipeDialog, toggleRecipeDialog] = useState(false);
 
 	const { data: recipe } = useGetRecipe(recipeId);
+	const { data: calories, refetch: fetchCalories } =
+		useGetRecipeCalories(recipeId);
 	const deleteRecipe = useDeleteRecipe();
 	const updateRecipe = useUpdateRecipe();
 
@@ -107,6 +114,14 @@ export const RecipeDetailPage = () => {
 							Description
 						</div>
 						<div className="whitespace-pre-wrap">{recipe?.content}</div>
+					</div>
+					<div className="flex gap-2 items-center">
+						<Button variant="outline" onClick={() => fetchCalories()}>
+							Load Calories
+						</Button>
+						{calories !== undefined && (
+							<div className="text-sm">Calories: {calories}</div>
+						)}
 					</div>
 				</CardContent>
 			</Card>
