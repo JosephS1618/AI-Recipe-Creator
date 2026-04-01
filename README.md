@@ -44,6 +44,8 @@ Create a `.env` file in the root directory of the project. You can use the `.env
 cp .env.example .env
 ```
 
+Then update the `.env` file with your Gemini API Keys. You can get your Gemini API Keys from the [Google AI Studio](https://aistudio.google.com/app/apikey).
+
 ## Running the project
 
 ### If you want to run frontend and backend at the same time
@@ -83,3 +85,13 @@ You can use `psql` command to run the sql files. e.g.:
 ```bash
 psql -d cpsc_304_project -f packages/scripts/test_data/test_update.sql
 ```
+
+## Note about the frontend components
+
+We're using [shadcn/ui](https://ui.shadcn.com) for the frontend components, and every component in `packages/frontend/src/components/ui/` is copied from it.
+
+For example, if you want to use the [Calendar](https://ui.shadcn.com/docs/components/radix/calendar) component, you will first run `npx shadcn@latest add calendar` and it will copy the component to the `packages/frontend/src/components/ui/` folder.
+
+In this way, we can only use the components that we really need, and keep the bundle size of the frontend as small as possible.
+
+
