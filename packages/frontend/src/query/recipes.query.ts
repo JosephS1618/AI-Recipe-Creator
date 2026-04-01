@@ -5,6 +5,7 @@ import {
 	generateAiRecipe,
 	getRecipe,
 	getRecipeCalories,
+	listIngredientCountsByRecipe,
 	listIngredientsUsedInAllRecipes,
 	listRecipes,
 	updateRecipe,
@@ -14,6 +15,7 @@ import type {
 	ListRecipesQuery,
 	Recipe,
 	RecipeDivisionIngredient,
+	RecipeIngredientCount,
 	UpdateRecipeInput,
 } from "./recipes.types";
 
@@ -28,6 +30,14 @@ export function useGetIngredientsUsedInAllRecipes() {
 	return useQuery<RecipeDivisionIngredient[], Error>({
 		queryKey: ["recipes", "ingredients-used-in-all-recipes"],
 		queryFn: listIngredientsUsedInAllRecipes,
+		enabled: false,
+	});
+}
+
+export function useGetIngredientCountsByRecipe() {
+	return useQuery<RecipeIngredientCount[], Error>({
+		queryKey: ["recipes", "ingredient-counts"],
+		queryFn: listIngredientCountsByRecipe,
 		enabled: false,
 	});
 }

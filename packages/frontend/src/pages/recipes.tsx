@@ -24,6 +24,7 @@ import {
 	type CreateRecipeInput,
 	useCreateRecipe,
 	useGenerateAiRecipe,
+	useGetIngredientCountsByRecipe,
 	useGetIngredientsUsedInAllRecipes,
 	useGetRecipes,
 } from "@/query";
@@ -56,6 +57,10 @@ export const Recipes = () => {
 	const { data: recipes = [] } = useGetRecipes(
 		minTotalProtein !== undefined ? { minTotalProtein } : undefined,
 	);
+	const {
+		data: ingredientCountsByRecipe = [],
+		refetch: fetchIngredientCountsByRecipe,
+	} = useGetIngredientCountsByRecipe();
 	const {
 		data: ingredientsUsedInAllRecipes = [],
 		refetch: fetchIngredientsUsedInAllRecipes,
@@ -185,6 +190,24 @@ export const Recipes = () => {
 							</TableBody>
 						</Table>
 					)}
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardContent className="space-y-4">
+					<Button
+						variant="outline"
+						onClick={() => fetchIngredientCountsByRecipe()}
+					>
+						Show Ingredient Counts By Recipe
+					</Button>
+					<ul className="list-disc pl-6">
+						{ingredientCountsByRecipe.map((recipe) => (
+							<li key={recipe.recipe_id}>
+								{recipe.recipe_name}: {recipe.ingredient_count}
+							</li>
+						))}
+					</ul>
 				</CardContent>
 			</Card>
 

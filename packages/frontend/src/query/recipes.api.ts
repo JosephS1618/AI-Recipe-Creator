@@ -3,6 +3,7 @@ import type {
 	ListRecipesQuery,
 	Recipe,
 	RecipeDivisionIngredient,
+	RecipeIngredientCount,
 	RecipeItem,
 	UpdateRecipeInput,
 } from "./recipes.types";
@@ -22,6 +23,15 @@ export async function listIngredientsUsedInAllRecipes(): Promise<
 > {
 	const response = await apiClient.get<ApiResponse<RecipeDivisionIngredient[]>>(
 		"/recipes/ingredients-used-in-all-recipes",
+	);
+	return response.data.data;
+}
+
+export async function listIngredientCountsByRecipe(): Promise<
+	RecipeIngredientCount[]
+> {
+	const response = await apiClient.get<ApiResponse<RecipeIngredientCount[]>>(
+		"/recipes/ingredient-counts",
 	);
 	return response.data.data;
 }

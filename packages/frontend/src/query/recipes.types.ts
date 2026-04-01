@@ -7,6 +7,12 @@ export type RecipeDivisionIngredient = {
 	ingredient_name: string;
 };
 
+export type RecipeIngredientCount = {
+	recipe_id: string;
+	recipe_name: string;
+	ingredient_count: string;
+};
+
 export type Recipe = {
 	recipe_id: string;
 	account_id: string;

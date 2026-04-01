@@ -4,6 +4,7 @@ import type {
 	CreateRecipe,
 	Recipe,
 	RecipeIngredient,
+	RecipeIngredientCount,
 	RecipeItem,
 	UpdateRecipe,
 } from "./recipes.types";
@@ -199,6 +200,21 @@ export class RecipesService {
 				ri.RecipeID;
 		`;
 		return result?.total_calories || null;
+	}
+
+	async listIngredientCountsByRecipe(
+		account_id: string,
+	): Promise<RecipeIngredientCount[]> {
+		return sql<RecipeIngredientCount[]>`
+			SELECT
+				r.RecipeID AS recipe_id,
+				r.Name AS recipe_name,
+				COUNT(*) AS ingredient_count
+			FROM Recipe r
+			JOIN RecipeIngredient ri ON ri.RecipeID = r.RecipeID
+			WHERE r.AccountID = ${account_id}
+			GROUP BY r.RecipeID, r.Name;
+		`;
 	}
 
 	async remove(recipe_id: string, account_id: string): Promise<void> {

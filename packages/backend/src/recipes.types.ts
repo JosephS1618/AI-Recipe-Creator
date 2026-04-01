@@ -40,10 +40,17 @@ export const ListRecipesQuerySchema = z.object({
 
 export const CalorieResponseSchema = z.number();
 
+export const RecipeIngredientCountSchema = z.object({
+	recipe_id: z.string().uuid(),
+	recipe_name: z.string(),
+	ingredient_count: z.string(),
+});
+
 export type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
 export type RecipeBody = z.infer<typeof RecipeBodySchema>;
 export type Recipe = z.infer<typeof RecipeSchema>;
 export type RecipeItem = z.infer<typeof RecipeItemSchema>;
+export type RecipeIngredientCount = z.infer<typeof RecipeIngredientCountSchema>;
 
 export type CreateRecipe = RecipeBody & {
 	account_id: string;

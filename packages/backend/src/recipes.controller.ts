@@ -36,6 +36,11 @@ export class RecipesController {
 		return this.recipesService.listIngredientsUsedInAllRecipes(accountId);
 	}
 
+	@Get("recipes/ingredient-counts")
+	listIngredientCountsByRecipe(@CurrentAccountId() accountId: string) {
+		return this.recipesService.listIngredientCountsByRecipe(accountId);
+	}
+
 	@Post("recipe/create")
 	create(@CurrentAccountId() accountId: string, @Body() body: CreateRecipeDto) {
 		return this.recipesService.create({
