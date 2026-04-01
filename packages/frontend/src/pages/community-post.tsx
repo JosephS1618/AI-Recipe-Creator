@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAccountSession } from "@/components/account-provider";
 import { PostReaction } from "@/components/post-reaction";
@@ -21,16 +21,41 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreatePost, useGetPosts, useGetRecipes } from "@/query";
+import { cn } from "@/lib/utils";
+import {
+	type CommunityPostItem,
+	useCreatePost,
+	useGetPosts,
+	useGetRecipes,
+} from "@/query";
 
 export const CommunityPost = () => {
+	const [recipeSearch, setRecipeSearch] = useState("");
+	const deferredRecipeSearch = useDeferredValue(recipeSearch);
+	const { data: posts } = useGetPosts(deferredRecipeSearch);
+
 	return (
 		<div className="px-4 space-y-6">
 			<div className="flex items-center justify-between">
 				<h1 className="text-3xl font-bold">Community Posts</h1>
 			</div>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>Search Posts</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<Input
+						value={recipeSearch}
+						placeholder="Search by recipe name"
+						onChange={(e) => setRecipeSearch(e.target.value)}
+					/>
+				</CardContent>
+			</Card>
+
+			<PostListWithDetail posts={posts} />
+
 			<CreatePostForm />
-			<PostListWithDetail />
 		</div>
 	);
 };
@@ -153,15 +178,22 @@ function CreatePostForm() {
 	);
 }
 
-function PostListWithDetail() {
-	const { data: recipes = [] } = useGetRecipes();
-	const { data: posts = [] } = useGetPosts();
-	const [selectedPostId, setSelectedPostId] = useState("");
-
-	const selectedPost = posts.find((post) => post.post_id === selectedPostId);
-	const selectedPostRecipe = recipes.find(
-		(recipe) => recipe.recipe_id === selectedPost?.recipe_id,
+function PostListWithDetail({ posts }: { posts?: CommunityPostItem[] }) {
+	const [selectedPost, setSelectedPost] = useState<CommunityPostItem | null>(
+		null,
 	);
+
+	useEffect(() => {
+		setSelectedPost((currentPost) => {
+			if (!posts?.length) {
+				return null;
+			}
+
+			return (
+				posts.find((post) => post.post_id === currentPost?.post_id) ?? posts[0]
+			);
+		});
+	}, [posts]);
 
 	return (
 		<div className="flex gap-8">
@@ -172,15 +204,26 @@ function PostListWithDetail() {
 				<CardContent>
 					<Table>
 						<TableBody>
-							{posts.map((post) => (
+							{posts?.map((post) => (
 								<TableRow
 									key={post.post_id}
-									className="cursor-pointer hover:bg-muted"
-									onClick={() => setSelectedPostId(post.post_id)}
+									className={cn(
+										"cursor-pointer hover:bg-muted",
+										post.post_id === selectedPost?.post_id && "bg-muted",
+									)}
+									onClick={() => setSelectedPost(post)}
 								>
 									<TableCell>{post.title}</TableCell>
 								</TableRow>
 							))}
+
+							{!posts?.length && (
+								<TableRow>
+									<TableCell className="text-muted-foreground">
+										No posts found.
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				</CardContent>
@@ -188,12 +231,10 @@ function PostListWithDetail() {
 
 			{selectedPost && (
 				<Card className="w-2/3">
-					<CardContent className="space-y-4">
-						<div className="text-xs text-muted-foreground ">
-							{selectedPostRecipe?.name?.trim()
-								? `Recipe: ${selectedPostRecipe?.name}`
-								: "NO RECIPE"}
-						</div>
+					<CardContent className="text-xs text-muted-foreground grid grid-cols-1 gap-1">
+						<span>{`Recipe: ${selectedPost.recipe_name ?? "No recipe"}`}</span>
+						<span>{`Visibility: ${selectedPost?.visibility}`}</span>
+						<span>{`By Account: ${selectedPost?.account_id}`}</span>
 					</CardContent>
 					<CardHeader>
 						<CardTitle>{selectedPost.title}</CardTitle>

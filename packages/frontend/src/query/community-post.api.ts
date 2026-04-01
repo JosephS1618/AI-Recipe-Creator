@@ -17,3 +17,15 @@ export async function createPost(postBody: CommunityPostBody): Promise<void> {
 	);
 	return response.data.data;
 }
+
+export async function searchPosts(
+	recipeName: string,
+): Promise<CommunityPostItem[]> {
+	const response = await apiClient.get<ApiResponse<CommunityPostItem[]>>(
+		"/posts/search",
+		{
+			params: { recipeName },
+		},
+	);
+	return response.data.data;
+}

@@ -9,13 +9,16 @@ export class CommunityPostController {
 	constructor(private readonly service: CommunityPostService) {}
 
 	@Get("posts")
-	list(@CurrentAccountId() accountId?: string) {
+	list(@CurrentAccountId() accountId: string) {
 		return this.service.list(accountId);
 	}
 
 	@Get("posts/search")
-	search(@Query("recipeName") recipeName: string) {
-		return this.service.searchByRecipeName(recipeName);
+	search(
+		@Query("recipeName") recipeName: string,
+		@CurrentAccountId() accountId: string,
+	) {
+		return this.service.searchByRecipeName(recipeName, accountId);
 	}
 
 	@Post("posts/create")

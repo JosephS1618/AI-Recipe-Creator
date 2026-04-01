@@ -4,31 +4,13 @@ import { Injectable } from "@nestjs/common";
 import type {
 	CommunityPostItem,
 	CreateCommunityPost,
-	PostSearchResult,
 } from "./community-post.types";
 import { sql } from "./sql";
 
 @Injectable()
 export class CommunityPostService {
-	async list(accountId?: string): Promise<CommunityPostItem[]> {
-		if (!accountId) {
-			const posts = await sql<CommunityPostItem[]>`
-				SELECT
-					PostID AS post_id,
-					Title AS title,
-					Body AS body,
-					CreationDate AS creation_date,
-					Visibility AS visibility,
-					AccountID AS account_id,
-					RecipeID AS recipe_id,
-					NULL::VARCHAR AS user_reaction
-				FROM Post 
-				ORDER BY CreationDate DESC;
-			`;
-			return posts;
-		}
-
-		const posts = await sql<CommunityPostItem[]>`
+	async list(accountId: string): Promise<CommunityPostItem[]> {
+		return sql<CommunityPostItem[]>`
 			SELECT
 				p.PostID AS post_id,
 				p.Title AS title,
@@ -37,12 +19,14 @@ export class CommunityPostService {
 				p.Visibility AS visibility,
 				p.AccountID AS account_id,
 				p.RecipeID AS recipe_id,
+				r.Name AS recipe_name,
 				pr.Emoji AS user_reaction
 			FROM Post p
+			LEFT JOIN Recipe r ON p.RecipeID = r.RecipeID
 			LEFT JOIN PostReaction pr ON p.PostID = pr.PostID AND pr.AccountID = ${accountId}
+			WHERE p.Visibility = 'public' OR p.AccountID = ${accountId}
 			ORDER BY p.CreationDate DESC;
 		`;
-		return posts;
 	}
 
 	async create(post: CreateCommunityPost): Promise<void> {
@@ -71,20 +55,28 @@ export class CommunityPostService {
 		`;
 	}
 
-	async searchByRecipeName(recipeName: string): Promise<PostSearchResult[]> {
+	async searchByRecipeName(
+		recipeName: string,
+		accountId: string,
+	): Promise<CommunityPostItem[]> {
 		const searchParam = `%${recipeName}%`;
-		return sql<PostSearchResult[]>`
-			SELECT 
+
+		return sql<CommunityPostItem[]>`
+			SELECT
+				p.PostID AS post_id,
 				p.Title AS title,
 				p.Body AS body,
 				p.CreationDate AS creation_date,
-				a.Username AS username,
-				r.Name AS recipe_name
+				p.Visibility AS visibility,
+				p.AccountID AS account_id,
+				p.RecipeID AS recipe_id,
+				r.Name AS recipe_name,
+				pr.Emoji AS user_reaction
 			FROM Post p
 			JOIN Recipe r ON p.RecipeID = r.RecipeID
-			JOIN Account a ON p.AccountID = a.AccountID
-			WHERE p.Visibility = 'public' 
-			  AND r.Name ILIKE ${searchParam};
+			LEFT JOIN PostReaction pr ON p.PostID = pr.PostID AND pr.AccountID = ${accountId}
+			WHERE (p.Visibility = 'public' OR p.AccountID = ${accountId}) AND r.Name ILIKE ${searchParam}
+			ORDER BY p.CreationDate DESC;
 		`;
 	}
 }

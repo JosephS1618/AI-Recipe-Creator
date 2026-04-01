@@ -6,6 +6,7 @@ export type CommunityPostItem = {
 	visibility: "private" | "public";
 	account_id: string;
 	recipe_id: string | null;
+	recipe_name: string | null;
 	user_reaction?: string | null;
 };
 
