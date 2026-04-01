@@ -1,4 +1,3 @@
-import { Type } from "@google/genai";
 import {
 	BadRequestException,
 	Injectable,
@@ -6,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { createZodDto } from "nestjs-zod";
 import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { ai, model } from "./ai";
 import { NormalizedNameMap } from "./ingredients.utils";
@@ -143,21 +143,21 @@ export class IngredientService {
 			(ingredient) => ingredient.name,
 			(ingredient) => ingredient.name,
 		);
+
 		const createdIngredients = await this.addManyByAi({
 			names: requestedNames.filter(
 				(name) => !existingIngredientNames.has(name),
 			),
 		});
-		const resolvedIngredientNames = existingIngredientNames.clone();
 
 		for (const ingredient of createdIngredients) {
-			resolvedIngredientNames.set(ingredient.name, ingredient.name);
+			existingIngredientNames.set(ingredient.name, ingredient.name);
 		}
 
 		return {
 			createdIngredients,
 			resolvedNames: requestedNames.map((name) => {
-				const resolvedName = resolvedIngredientNames.get(name);
+				const resolvedName = existingIngredientNames.get(name);
 
 				if (!resolvedName) {
 					throw new InternalServerErrorException(
@@ -185,104 +185,51 @@ export class IngredientService {
 	private async generateNutritionByAi(
 		names: string[],
 	): Promise<IngredientItem[]> {
-		try {
-			const uniqueNames = NormalizedNameMap.uniqueNames(names);
+		const uniqueNames = NormalizedNameMap.uniqueNames(names);
 
-			if (uniqueNames.length === 0) {
-				return [];
-			}
-
-			const response = await ai.models.generateContent({
-				model,
-				contents: [
-					"Estimate the nutrition values for each ingredient in this list:",
-					...uniqueNames.map((name) => `- ${name}`),
-					"Return grams of carbs, protein, and fat per 100 g of each ingredient.",
-					'Use the exact provided ingredient name in each "name" field.',
-					'Return JSON only with an "ingredients" array.',
-				].join("\n"),
-				config: {
-					responseMimeType: "application/json",
-					responseSchema: {
-						type: Type.OBJECT,
-						required: ["ingredients"],
-						properties: {
-							ingredients: {
-								type: Type.ARRAY,
-								items: {
-									type: Type.OBJECT,
-									required: ["name", "carbs", "protein", "fat"],
-									properties: {
-										name: {
-											type: Type.STRING,
-											description:
-												"Ingredient name copied exactly from the prompt.",
-										},
-										carbs: {
-											type: Type.NUMBER,
-											description: "Estimated grams of carbohydrates.",
-											minimum: 0,
-										},
-										protein: {
-											type: Type.NUMBER,
-											description: "Estimated grams of protein.",
-											minimum: 0,
-										},
-										fat: {
-											type: Type.NUMBER,
-											description: "Estimated grams of fat.",
-											minimum: 0,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			});
-
-			if (!response.text) {
-				throw new Error("Gemini returned an empty response");
-			}
-
-			const parsed = JSON.parse(response.text);
-			const result = IngredientNutritionBatchSchema.safeParse(parsed);
-
-			if (!result.success) {
-				throw new Error(
-					result.error.issues.map((issue) => issue.message).join(", "),
-				);
-			}
-
-			const ingredientByName = NormalizedNameMap.fromItems(
-				result.data.ingredients,
-				(ingredient) => ingredient.name,
-				(ingredient) => ingredient,
-			);
-
-			return names.map((name) => {
-				const matchedIngredient = ingredientByName.get(name);
-
-				if (!matchedIngredient) {
-					throw new Error(
-						`Gemini did not return nutrition values for "${name}"`,
-					);
-				}
-
-				return {
-					name,
-					carbs: matchedIngredient.carbs,
-					protein: matchedIngredient.protein,
-					fat: matchedIngredient.fat,
-				};
-			});
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Unknown Gemini error";
-
-			throw new InternalServerErrorException(
-				`Failed to generate ingredient values with Gemini: ${message}`,
-			);
+		if (uniqueNames.length === 0) {
+			return [];
 		}
+
+		// https://ai.google.dev/gemini-api/docs/structured-output?example=recipe#javascript_2
+		const response = await ai.models.generateContent({
+			model,
+			contents: [
+				"Estimate the nutrition values for each ingredient in this list:",
+				...uniqueNames.map((name) => `- ${name}`),
+				"Return grams of carbs, protein, and fat per 100 g of each ingredient.",
+				'Use the exact provided ingredient name in each "name" field.',
+			].join("\n"),
+			config: {
+				responseMimeType: "application/json",
+				responseJsonSchema: zodToJsonSchema(IngredientNutritionBatchSchema),
+			},
+		});
+
+		if (!response.text) {
+			throw new Error("Gemini returned an empty response");
+		}
+
+		const ingredientByName = NormalizedNameMap.fromItems(
+			IngredientNutritionBatchSchema.parse(JSON.parse(response.text))
+				.ingredients,
+			(ingredient) => ingredient.name,
+			(ingredient) => ingredient,
+		);
+
+		return names.map((name) => {
+			const matchedIngredient = ingredientByName.get(name);
+
+			if (!matchedIngredient) {
+				throw new Error(`Gemini did not return nutrition values for "${name}"`);
+			}
+
+			return {
+				name,
+				carbs: matchedIngredient.carbs,
+				protein: matchedIngredient.protein,
+				fat: matchedIngredient.fat,
+			};
+		});
 	}
 }

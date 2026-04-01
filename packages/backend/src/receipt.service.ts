@@ -1,4 +1,3 @@
-import { Type } from "@google/genai";
 import {
 	BadRequestException,
 	Injectable,
@@ -7,6 +6,7 @@ import {
 import { lookup } from "mime-types";
 import { createZodDto } from "nestjs-zod";
 import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { ai, model } from "./ai";
 import { IngredientService } from "./ingredients.service";
@@ -189,82 +189,39 @@ export class ReceiptService {
 			throw new Error("Invalid file type");
 		}
 
-		try {
-			const response = await ai.models.generateContent({
-				model,
-				contents: [
-					{
-						text: [
-							"Analyze this grocery receipt image and extract inventory items.",
-							"Only include grocery ingredients or simple pantry items that should be added to a home inventory.",
-							"Ignore taxes, totals, discounts, loyalty information, store metadata, prepared meals, and non-food household items.",
-							"Normalize each ingredient name to a concise common ingredient name in title case.",
-							"Merge duplicate ingredients and return integer quantities.",
-							"Return JSON only.",
-						].join("\n"),
-					},
-					{
-						inlineData: {
-							data: uploadedFile.buffer.toString("base64"),
-							mimeType,
-						},
-					},
-				],
-				config: {
-					responseMimeType: "application/json",
-					responseSchema: {
-						type: Type.OBJECT,
-						required: ["items"],
-						properties: {
-							items: {
-								type: Type.ARRAY,
-								items: {
-									type: Type.OBJECT,
-									required: ["ingredient_name", "quantity"],
-									properties: {
-										ingredient_name: {
-											type: Type.STRING,
-											description:
-												"Normalized grocery ingredient name in title case.",
-										},
-										quantity: {
-											type: Type.INTEGER,
-											description:
-												"Number of units or packages purchased for the ingredient.",
-											minimum: 1,
-										},
-									},
-								},
-							},
-						},
+		// https://ai.google.dev/gemini-api/docs/structured-output?example=recipe#javascript_2
+		const response = await ai.models.generateContent({
+			model,
+			contents: [
+				{
+					text: [
+						"Analyze this grocery receipt image and extract inventory items.",
+						"Only include grocery ingredients or simple pantry items that should be added to a home inventory.",
+						"Ignore taxes, totals, discounts, loyalty information, store metadata, prepared meals, and non-food household items.",
+						"Normalize each ingredient name to a concise common ingredient name in title case.",
+						"Merge duplicate ingredients and return integer quantities.",
+					].join("\n"),
+				},
+				{
+					inlineData: {
+						data: uploadedFile.buffer.toString("base64"),
+						mimeType,
 					},
 				},
-			});
+			],
+			config: {
+				responseMimeType: "application/json",
+				responseJsonSchema: zodToJsonSchema(ParsedReceiptSchema),
+			},
+		});
 
-			if (!response.text) {
-				throw new Error("Gemini returned an empty response");
-			}
-
-			const parsed = JSON.parse(response.text);
-			const result = ParsedReceiptSchema.safeParse(parsed);
-
-			if (!result.success) {
-				throw new Error(
-					result.error.issues.map((issue) => issue.message).join(", "),
-				);
-			}
-
-			return {
-				...result.data,
-				rawResponse: response.text,
-			};
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Unknown Gemini error";
-
-			throw new InternalServerErrorException(
-				`Failed to parse receipt with Gemini: ${message}`,
-			);
+		if (!response.text) {
+			throw new Error("Gemini returned an empty response");
 		}
+
+		return {
+			...ParsedReceiptSchema.parse(JSON.parse(response.text)),
+			rawResponse: response.text,
+		};
 	}
 }

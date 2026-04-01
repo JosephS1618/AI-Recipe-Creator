@@ -1,9 +1,6 @@
-import { Type } from "@google/genai";
-import {
-	BadRequestException,
-	Injectable,
-	InternalServerErrorException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 import { ai, model } from "./ai";
 import { RecipesService } from "./recipes.service";
@@ -17,17 +14,21 @@ type InventoryPromptItem = {
 	quantity: number;
 };
 
-type GeneratedRecipe = {
-	name: string;
-	content: string;
-	cost_in_cents: number;
-	cuisine: string;
-	time: number;
-	ingredients: {
-		ingredient_name: string;
-		quantity: number;
-	}[];
-};
+const GeneratedRecipeSchema = z.object({
+	name: z.string(),
+	content: z.string(),
+	cost_in_cents: z.number().int(),
+	cuisine: z.string(),
+	time: z.number().int(),
+	ingredients: z.array(
+		z.object({
+			ingredient_name: z.string(),
+			quantity: z.number().int(),
+		}),
+	),
+});
+
+type GeneratedRecipe = z.infer<typeof GeneratedRecipeSchema>;
 
 @Injectable()
 export class AiRecipeService {
@@ -55,77 +56,42 @@ export class AiRecipeService {
 			);
 		}
 
-		try {
-			const response = await ai.models.generateContent({
-				model,
-				contents: [
-					{
-						text: [
-							"Generate one recipe for a recipe app.",
-							"Base the recipe on the user's inventory items and prefer using what they already have.",
-							"Keep the recipe practical and simple.",
-							"Return JSON only.",
-							"Inventory items:",
-							JSON.stringify(inventoryItems, null, 2),
-						].join("\n"),
-					},
-				],
-				config: {
-					responseMimeType: "application/json",
-					responseSchema: {
-						type: Type.OBJECT,
-						required: [
-							"name",
-							"content",
-							"cost_in_cents",
-							"cuisine",
-							"time",
-							"ingredients",
-						],
-						properties: {
-							name: { type: Type.STRING },
-							content: { type: Type.STRING },
-							cost_in_cents: { type: Type.INTEGER },
-							cuisine: { type: Type.STRING },
-							time: { type: Type.INTEGER },
-							ingredients: {
-								type: Type.ARRAY,
-								items: {
-									type: Type.OBJECT,
-									required: ["ingredient_name", "quantity"],
-									properties: {
-										ingredient_name: { type: Type.STRING },
-										quantity: { type: Type.INTEGER },
-									},
-								},
-							},
-						},
-					},
+		// https://ai.google.dev/gemini-api/docs/structured-output?example=recipe#javascript_2
+		const response = await ai.models.generateContent({
+			model,
+			contents: [
+				{
+					text: [
+						"Generate one recipe for a recipe app.",
+						"Base the recipe on the user's inventory items and prefer using what they already have.",
+						"Keep the recipe practical and simple.",
+						"Inventory items:",
+						JSON.stringify(inventoryItems, null, 2),
+					].join("\n"),
 				},
-			});
+			],
+			config: {
+				responseMimeType: "application/json",
+				responseJsonSchema: zodToJsonSchema(GeneratedRecipeSchema),
+			},
+		});
 
-			if (!response.text) {
-				throw new Error("Gemini returned an empty response");
-			}
-
-			const generatedRecipe = JSON.parse(response.text) as GeneratedRecipe;
-
-			return this.recipesService.create({
-				account_id: accountId,
-				name: generatedRecipe.name,
-				content: generatedRecipe.content,
-				cost_in_cents: generatedRecipe.cost_in_cents,
-				cuisine: generatedRecipe.cuisine || null,
-				time: generatedRecipe.time,
-				ingredients: generatedRecipe.ingredients,
-			});
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Unknown Gemini error";
-
-			throw new InternalServerErrorException(
-				`Failed to generate recipe with Gemini: ${message}`,
-			);
+		if (!response.text) {
+			throw new Error("Gemini returned an empty response");
 		}
+
+		const generatedRecipe: GeneratedRecipe = GeneratedRecipeSchema.parse(
+			JSON.parse(response.text),
+		);
+
+		return this.recipesService.create({
+			account_id: accountId,
+			name: generatedRecipe.name,
+			content: generatedRecipe.content,
+			cost_in_cents: generatedRecipe.cost_in_cents,
+			cuisine: generatedRecipe.cuisine || null,
+			time: generatedRecipe.time,
+			ingredients: generatedRecipe.ingredients,
+		});
 	}
 }

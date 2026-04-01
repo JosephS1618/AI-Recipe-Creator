@@ -47,14 +47,4 @@ export class NormalizedNameMap<TValue> {
 		this.valuesByName.set(NormalizedNameMap.normalizeName(name), value);
 		return this;
 	}
-
-	clone(): NormalizedNameMap<TValue> {
-		const lookup = new NormalizedNameMap<TValue>();
-
-		for (const [normalizedName, value] of this.valuesByName) {
-			lookup.valuesByName.set(normalizedName, value);
-		}
-
-		return lookup;
-	}
 }

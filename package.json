@@ -16,5 +16,8 @@
 		"concurrently": "^9.2.1",
 		"lefthook": "^2.1.1",
 		"postgres": "^3.4.8"
+	},
+	"dependencies": {
+		"zod-to-json-schema": "^3.25.2"
 	}
 }

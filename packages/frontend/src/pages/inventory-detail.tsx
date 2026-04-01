@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/table";
 import { UploadButton } from "@/components/upload-button";
 import {
-	type DeleteInventoryItem,
 	type InventoryItem,
 	type InventoryItemFilter,
 	useAddInventoryItem,
@@ -92,18 +91,25 @@ function InventoryItemList({
 					<Button
 						variant="outline"
 						onClick={() => {
-							editInventoryItem.mutate({
-								inventoryId,
-								item: {
-									inventory_item_id: item.inventory_item_id,
-									inventory_id: inventoryId,
-									ingredient_name: item.ingredient_name,
-									quantity,
-									creation_date: creationDate,
-									expiration_date: expirationDate || null,
-									receipt_id: item.receipt_id ?? null,
+							editInventoryItem.mutate(
+								{
+									inventoryId,
+									item: {
+										inventory_item_id: item.inventory_item_id,
+										inventory_id: inventoryId,
+										ingredient_name: item.ingredient_name,
+										quantity,
+										creation_date: creationDate,
+										expiration_date: expirationDate || null,
+										receipt_id: item.receipt_id ?? null,
+									},
 								},
-							});
+								{
+									onSuccess: () => {
+										toast.success("Inventory item updated successfully");
+									},
+								},
+							);
 						}}
 					>
 						Update
@@ -113,13 +119,20 @@ function InventoryItemList({
 						variant="outline"
 						className="text-destructive hover:text-destructive"
 						onClick={() => {
-							removeInventoryItem.mutate({
-								inventoryId,
-								item: {
-									inventory_item_id: item.inventory_item_id,
-									inventory_id: inventoryId,
-								} as DeleteInventoryItem & { inventory_id: string },
-							});
+							removeInventoryItem.mutate(
+								{
+									inventoryId,
+									item: {
+										inventory_item_id: item.inventory_item_id,
+										inventory_id: inventoryId,
+									},
+								},
+								{
+									onSuccess: () => {
+										toast.success("Inventory item deleted successfully");
+									},
+								},
+							);
 						}}
 					>
 						Delete
@@ -263,6 +276,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 										setQuantity(0);
 										setCreationDate(today);
 										setExpirationDate(nextWeek);
+										toast.success("Inventory item added successfully");
 									},
 								},
 							);
@@ -317,7 +331,7 @@ export function InventoryDetail() {
 											createdIngredientNames.length > 0
 												? ` Created ${createdIngredientNames.length} new ingredient${
 														createdIngredientNames.length === 1 ? "" : "s"
-													}: ${createdIngredientNames.join(", ")}.`
+													}: ${createdIngredientNames.join(", ")}`
 												: "";
 
 										toast.success(
@@ -342,11 +356,6 @@ export function InventoryDetail() {
 			</div>
 
 			<InventoryItemsList inventoryId={inventoryId} />
-			{addInventoryItemsFromReceipt.isPending && (
-				<p className="text-sm text-muted-foreground">
-					Parsing receipt and adding inventory items...
-				</p>
-			)}
 			<AddInventoryItemCard inventoryId={inventoryId} />
 		</div>
 	);

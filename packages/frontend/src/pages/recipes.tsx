@@ -41,22 +41,15 @@ export const Recipes = () => {
 
 	let minTotalProtein: number | undefined;
 
-	if (proteinLevel === "proteinOver5") {
-		minTotalProtein = 5;
-	}
 	if (proteinLevel === "proteinOver10") {
 		minTotalProtein = 10;
 	}
-	if (proteinLevel === "proteinOver20") {
-		minTotalProtein = 20;
-	}
-	if (proteinLevel === "proteinOver30") {
-		minTotalProtein = 30;
+
+	if (proteinLevel === "proteinOver50") {
+		minTotalProtein = 50;
 	}
 
-	const { data: recipes = [] } = useGetRecipes(
-		minTotalProtein !== undefined ? { minTotalProtein } : undefined,
-	);
+	const { data: recipes = [] } = useGetRecipes({ minTotalProtein });
 	const {
 		data: ingredientCountsByRecipe = [],
 		refetch: fetchIngredientCountsByRecipe,
@@ -138,15 +131,11 @@ export const Recipes = () => {
 								<SelectItem value="proteinLevelNotSelected">
 									All recipes
 								</SelectItem>
-								<SelectItem value="proteinOver5">over 5g of Protein</SelectItem>
 								<SelectItem value="proteinOver10">
 									over 10g of Protein
 								</SelectItem>
-								<SelectItem value="proteinOver20">
-									over 20g of Protein
-								</SelectItem>
-								<SelectItem value="proteinOver30">
-									over 30g of Protein
+								<SelectItem value="proteinOver50">
+									over 50g of Protein
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -163,6 +152,7 @@ export const Recipes = () => {
 									<TableHead>Cuisine</TableHead>
 									<TableHead>Time</TableHead>
 									<TableHead>Cost</TableHead>
+									{minTotalProtein && <TableHead>Protein</TableHead>}
 									<TableHead>Created</TableHead>
 									<TableHead>Updated</TableHead>
 								</TableRow>
@@ -181,6 +171,9 @@ export const Recipes = () => {
 										<TableCell>{recipe.cuisine ?? "—"}</TableCell>
 										<TableCell>{recipe.time}</TableCell>
 										<TableCell>{formatCost(recipe.cost_in_cents)}</TableCell>
+										{minTotalProtein && (
+											<TableHead>{recipe.total_protein}</TableHead>
+										)}
 										<TableCell>{formatDate(recipe.creation_date)}</TableCell>
 										<TableCell>
 											{formatDate(recipe.modification_date)}

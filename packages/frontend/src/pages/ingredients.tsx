@@ -1,5 +1,6 @@
-import { BadgeCheck } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,16 +50,7 @@ function IngredientListItem({
 			<TableCell>
 				<div className="flex items-center gap-2">
 					<span>{ingredient.name}</span>
-					{isFrequenlyUsed && (
-						// https://ui.shadcn.com/docs/components/base/badge
-						<Badge
-							className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-							variant="secondary"
-						>
-							<BadgeCheck data-icon="inline-start" />
-							Used Often
-						</Badge>
-					)}
+					{isFrequenlyUsed && <Badge variant="secondary">Used Often</Badge>}
 				</div>
 			</TableCell>
 
@@ -151,13 +143,7 @@ function IngredientsList() {
 						{clickedShowOftenUsed && (
 							<p className="mt-1 text-sm text-muted-foreground">
 								Items used more frequently are marked with{" "}
-								<Badge
-									className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
-									variant="secondary"
-								>
-									<BadgeCheck data-icon="inline-start" />
-									Used Often
-								</Badge>
+								<Badge variant="secondary">Used Often</Badge>
 							</p>
 						)}
 					</div>
@@ -330,6 +316,7 @@ function AddIngredientByAi() {
 								{
 									onSuccess: () => {
 										setName("");
+										toast.success("Ingredient added successfully");
 									},
 								},
 							)
