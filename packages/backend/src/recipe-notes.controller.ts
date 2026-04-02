@@ -17,7 +17,7 @@ export class RecipeNotesController {
 		@CurrentAccountId() accountId: string,
 		@Body() body: ProjectRecipeNotesDto,
 	) {
-		return this.recipeNotesService.project(accountId, body);
+		return this.recipeNotesService.list(accountId, body);
 	}
 
 	@Get("recipe-note/:recipeNoteId")

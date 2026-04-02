@@ -46,7 +46,9 @@ function InventoryItemList({
 	const editInventoryItem = useEditInventoryItem();
 	const removeInventoryItem = useRemoveInventoryItem();
 
+	const [ingredientName, setIngredientName] = useState(item.ingredient_name);
 	const [quantity, setQuantity] = useState(item.quantity);
+	const [receiptId, setReceiptId] = useState(item.receipt_id ?? "");
 	const [creationDate, setCreationDate] = useState(
 		formattedDate(item.creation_date),
 	);
@@ -56,7 +58,13 @@ function InventoryItemList({
 
 	return (
 		<TableRow>
-			<TableCell>{item.ingredient_name}</TableCell>
+			<TableCell>
+				<Input
+					value={ingredientName}
+					onChange={(e) => setIngredientName(e.target.value)}
+					className="min-w-36"
+				/>
+			</TableCell>
 
 			<TableCell>
 				<Input
@@ -87,21 +95,33 @@ function InventoryItemList({
 			</TableCell>
 
 			<TableCell>
+				<Input
+					value={receiptId}
+					placeholder="Null"
+					onChange={(e) => setReceiptId(e.target.value)}
+					className="min-w-36"
+				/>
+			</TableCell>
+
+			<TableCell>
 				<div className="flex flex-wrap gap-2">
 					<Button
 						variant="outline"
 						onClick={() => {
+							const trimmedIngredientName = ingredientName.trim();
+							const trimmedReceiptId = receiptId.trim();
+
 							editInventoryItem.mutate(
 								{
 									inventoryId,
 									item: {
 										inventory_item_id: item.inventory_item_id,
 										inventory_id: inventoryId,
-										ingredient_name: item.ingredient_name,
+										ingredient_name: trimmedIngredientName,
 										quantity,
 										creation_date: creationDate,
 										expiration_date: expirationDate || null,
-										receipt_id: item.receipt_id ?? null,
+										receipt_id: trimmedReceiptId || null,
 									},
 								},
 								{
@@ -171,6 +191,7 @@ function InventoryItemsList({ inventoryId }: { inventoryId: string }) {
 									<TableHead>Quantity</TableHead>
 									<TableHead>Creation Date</TableHead>
 									<TableHead>Expiration Date</TableHead>
+									<TableHead>Receipt ID</TableHead>
 									<TableHead>Actions</TableHead>
 								</TableRow>
 							</TableHeader>
@@ -202,6 +223,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 	const [quantity, setQuantity] = useState(0);
 	const [creationDate, setCreationDate] = useState(today);
 	const [expirationDate, setExpirationDate] = useState(nextWeek);
+	const [receiptId, setReceiptId] = useState("");
 
 	return (
 		<Card>
@@ -254,10 +276,20 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 					/>
 				</div>
 
+				<div className="grid gap-2">
+					<Label htmlFor="receipt_id">Receipt ID (optional)</Label>
+					<Input
+						id="receipt_id"
+						value={receiptId}
+						onChange={(e) => setReceiptId(e.target.value)}
+					/>
+				</div>
+
 				<div className="md:col-span-4">
 					<Button
 						onClick={() => {
 							const trimmedIngredientName = ingredientName.trim();
+							const trimmedReceiptId = receiptId.trim();
 
 							addInventoryItem.mutate(
 								{
@@ -267,7 +299,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 										quantity,
 										creation_date: creationDate,
 										expiration_date: expirationDate || null,
-										receipt_id: null,
+										receipt_id: trimmedReceiptId || null,
 									},
 								},
 								{
@@ -276,6 +308,7 @@ function AddInventoryItemCard({ inventoryId }: { inventoryId: string }) {
 										setQuantity(0);
 										setCreationDate(today);
 										setExpirationDate(nextWeek);
+										setReceiptId("");
 										toast.success("Inventory item added successfully");
 									},
 								},

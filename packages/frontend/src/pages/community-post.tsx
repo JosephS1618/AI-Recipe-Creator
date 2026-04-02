@@ -47,7 +47,7 @@ export const CommunityPost = () => {
 				<CardContent>
 					<Input
 						value={recipeSearch}
-						placeholder="Search by recipe name"
+						placeholder="By recipe name"
 						onChange={(e) => setRecipeSearch(e.target.value)}
 					/>
 				</CardContent>
@@ -153,7 +153,7 @@ function CreatePostForm() {
 					<div className="space-y-2">
 						<Label htmlFor="post-recipe">Recipe</Label>
 						<Select
-							value={recipeId ?? undefined}
+							value={recipeId ?? ""}
 							onValueChange={(value) => setRecipeId(value)}
 						>
 							<SelectTrigger id="post-recipe">

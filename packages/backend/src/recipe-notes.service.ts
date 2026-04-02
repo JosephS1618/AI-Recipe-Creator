@@ -89,31 +89,36 @@ type RecipeNoteRow = {
 	recipe_name: string | null;
 };
 
-const recipeNoteProjectionColumns: Record<RecipeNoteProjectionColumn, string> =
-	{
-		recipe_note_id: "recipenoteid",
-		photo: "photo",
-		note: "note",
-		account_id: "accountid",
-		creation_date: "creationdate",
-		modification_date: "modificationdate",
-	};
-
 @Injectable()
 export class RecipeNotesService {
-	async list(account_id: string): Promise<RecipeNoteListItem[]> {
-		return sql<RecipeNoteListItem[]>`
-			SELECT
-				RecipeNoteID AS recipe_note_id,
-				Photo AS photo,
-				Note AS note,
-				AccountID AS account_id,
-				CreationDate AS creation_date,
-				ModificationDate AS modification_date
+	async list(
+		account_id: string,
+		{ columns }: ProjectRecipeNotesBody,
+	): Promise<RecipeNoteProjectionResult> {
+		const columnName = {
+			recipe_note_id: sql("recipenoteid"),
+			photo: sql("photo"),
+			note: sql("note"),
+			account_id: sql("accountid"),
+			creation_date: sql("creationdate"),
+			modification_date: sql("modificationdate"),
+		};
+
+		const selectColumns = columns.map((column, index) =>
+			index ? sql`, ${columnName[column]}` : sql`${columnName[column]}`,
+		);
+
+		const rows = await sql<Record<string, RecipeNoteProjectionCell>[]>`
+			SELECT ${selectColumns}
 			FROM RecipeNote
 			WHERE AccountID = ${account_id}
 			ORDER BY ModificationDate DESC;
-		`;
+		`.values(); // return rows as an array of values for each column, instead of objects
+
+		return {
+			columns,
+			rows: rows.map((row) => [...row]),
+		};
 	}
 
 	async create(recipeNote: CreateRecipeNote): Promise<RecipeNote> {
@@ -211,29 +216,6 @@ export class RecipeNotesService {
 			WHERE RecipeNoteID = ${recipe_note_id}
 				AND AccountID = ${account_id};
 		`;
-	}
-
-	async project(
-		account_id: string,
-		body: ProjectRecipeNotesBody,
-	): Promise<RecipeNoteProjectionResult> {
-		const columns = body.columns;
-		const selectColumns = columns.flatMap((column, index) => [
-			index ? sql`,` : sql``,
-			sql`${sql(recipeNoteProjectionColumns[column])}`,
-		]);
-
-		const rows = await sql<Record<string, RecipeNoteProjectionCell>[]>`
-			SELECT ${selectColumns}
-			FROM RecipeNote
-			WHERE AccountID = ${account_id}
-			ORDER BY ModificationDate DESC;
-		`.values(); // return rows as an array of values for each column, instead of objects
-
-		return {
-			columns,
-			rows: rows.map((row) => [...row]),
-		};
 	}
 
 	private async loadRows(

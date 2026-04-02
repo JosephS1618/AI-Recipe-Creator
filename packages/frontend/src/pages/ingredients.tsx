@@ -41,8 +41,6 @@ function IngredientListItem({
 	const [protein, setProtein] = useState(Number(ingredient.protein));
 	const [fat, setFat] = useState(Number(ingredient.fat));
 
-	const [updateMessage, setUpdateMessage] = useState("");
-
 	const isFrequenlyUsed = frequentlyUsedIngredientsSet.has(ingredient.name);
 
 	return (
@@ -98,11 +96,7 @@ function IngredientListItem({
 								},
 								{
 									onSuccess: () => {
-										setUpdateMessage(`Updated: ${ingredient.name}`);
-										setTimeout(() => setUpdateMessage(""), 2250);
-									},
-									onError: () => {
-										setUpdateMessage("Update failed");
+										toast.success(`Updated: ${ingredient.name}`);
 									},
 								},
 							);
@@ -114,15 +108,18 @@ function IngredientListItem({
 					<Button
 						variant="outline"
 						className="text-destructive hover:text-destructive"
-						onClick={() => removeIngredient.mutate({ name: ingredient.name })}
+						onClick={() =>
+							removeIngredient.mutate(
+								{ name: ingredient.name },
+								{
+									onSuccess: () => toast.success(`Deleted: ${ingredient.name}`),
+								},
+							)
+						}
 					>
 						Delete
 					</Button>
 				</div>
-
-				{updateMessage && (
-					<p className="text-sm text-muted-foreground">{updateMessage}</p>
-				)}
 			</TableCell>
 		</TableRow>
 	);
@@ -140,12 +137,6 @@ function IngredientsList() {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>List of Available Ingredients</CardTitle>
-						{clickedShowOftenUsed && (
-							<p className="mt-1 text-sm text-muted-foreground">
-								Items used more frequently are marked with{" "}
-								<Badge variant="secondary">Used Often</Badge>
-							</p>
-						)}
 					</div>
 					{!clickedShowOftenUsed && (
 						<Button

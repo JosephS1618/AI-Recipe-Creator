@@ -8,6 +8,8 @@ import {
 	Logger,
 } from "@nestjs/common";
 import type { Response } from "express";
+import { ZodValidationException } from "nestjs-zod";
+import { fromError } from "zod-validation-error/v3";
 
 import type { ApiResponse } from "./api-response";
 
@@ -24,63 +26,31 @@ export class ApiExceptionFilter implements ExceptionFilter {
 				? exception.getStatus()
 				: HttpStatus.INTERNAL_SERVER_ERROR;
 
-		const msg =
-			exception instanceof HttpException
-				? this.getHttpExceptionMessage(exception)
-				: this.getUnknownExceptionMessage(exception);
+		const msg = this.getExceptionMessage(exception);
 
-		this.logException(exception, status);
+		this.logger.error(
+			`Request failed with status ${status}: ${msg}`,
+			exception instanceof Error ? exception.stack : undefined,
+		);
 
-		const body: ApiResponse<null> = {
+		response.status(status).json({
 			ok: false,
 			msg,
 			data: null,
-		};
-
-		response.status(status).json(body);
+		} satisfies ApiResponse<null>);
 	}
 
-	private logException(exception: unknown, status: number): void {
-		if (exception instanceof Error) {
-			this.logger.error(
-				`Request failed with status ${status}: ${exception.message}`,
-				exception.stack,
-			);
-			return;
+	private getExceptionMessage(exception: unknown): string {
+		if (exception instanceof ZodValidationException) {
+			return fromError(exception.getZodError())
+				.toString()
+				.replace(/^Validation error: /g, "");
 		}
 
-		this.logger.error(
-			`Request failed with status ${status}: ${inspect(exception)}`,
-		);
-	}
-
-	private getUnknownExceptionMessage(exception: unknown): string {
 		if (exception instanceof Error) {
 			return exception.message;
 		}
 
 		return inspect(exception);
-	}
-
-	private getHttpExceptionMessage(exception: HttpException): string {
-		const response = exception.getResponse();
-
-		if (typeof response === "string") {
-			return response;
-		}
-
-		if (typeof response === "object" && response !== null) {
-			const { message } = response as { message?: string | string[] };
-
-			if (Array.isArray(message)) {
-				return message.join(", ");
-			}
-
-			if (typeof message === "string") {
-				return message;
-			}
-		}
-
-		return exception.message;
 	}
 }

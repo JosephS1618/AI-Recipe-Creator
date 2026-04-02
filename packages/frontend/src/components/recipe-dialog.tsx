@@ -56,7 +56,10 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 		"Only ingredients already added to the ingredients table can be used in recipes";
 	const submitLabel = props.submitLabel ?? "Create";
 
-	const { data: everyIngredientInDatabase = [] } = useFetchIngredients();
+	const { data: listOfIngredients = [] } = useFetchIngredients();
+	const ingredientNames = listOfIngredients.map(
+		(ingredient) => ingredient.name,
+	);
 
 	const [recipeName, setRecipeName] = useState("");
 	const [recipeDescription, setRecipeDescription] = useState("");
@@ -81,17 +84,12 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 		);
 	}, [props.openRecipeDialog, props.passedValues]);
 
-	const listOfIngredients = everyIngredientInDatabase
-		.map((ingredient) => ingredient.name.trim())
-		.filter((name) => name.length > 0)
-		.sort();
-
-	const selectedNames = ingredients
-		.map((ingredient) => ingredient.ingredient_name)
-		.filter((name) => name.length > 0);
+	const selectedNames = ingredients.map(
+		(ingredient) => ingredient.ingredient_name,
+	);
 
 	const canNOTAddIngredientANYMORE =
-		selectedNames.length >= listOfIngredients.length;
+		selectedNames.length >= ingredientNames.length;
 
 	const setIngredientName = (index: number, name: string) => {
 		const updatedIngredients = [];
@@ -245,7 +243,7 @@ export const RecipeDialog = (props: RecipeDialogProps) => {
 					<div className="font-medium">Ingredients</div>
 
 					{ingredients.map((ingredient, index) => {
-						const availableIngredients = listOfIngredients.filter(
+						const availableIngredients = ingredientNames.filter(
 							(dropdownOption) => {
 								const alreadyUsedInAnotherRow = ingredients.some(
 									(otherIngredient, otherIndex) =>

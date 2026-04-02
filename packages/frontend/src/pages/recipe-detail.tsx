@@ -69,9 +69,7 @@ export const RecipeDetailPage = () => {
 									deleteRecipe.mutate(recipe.recipe_id, {
 										onSuccess: () => {
 											navigate("/recipes");
-										},
-										onError: () => {
-											toast.error("Error: Failed to Delete Recipe");
+											toast.success("Recipe deleted successfully");
 										},
 									});
 								}}
@@ -173,9 +171,7 @@ export const RecipeDetailPage = () => {
 							{
 								onSuccess: () => {
 									toggleRecipeDialog(false);
-								},
-								onError: () => {
-									toast.error("Error: Failed to Update Recipe");
+									toast.success("Recipe updated successfully");
 								},
 							},
 						);

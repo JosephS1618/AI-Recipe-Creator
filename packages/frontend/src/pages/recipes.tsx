@@ -80,9 +80,6 @@ export const Recipes = () => {
 				toast.success("Success: Recipe Created");
 				setDisplayDialog(false);
 			},
-			onError: () => {
-				toast.error("Error: Failed to Create Recipe");
-			},
 		});
 	};
 

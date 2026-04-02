@@ -3,7 +3,6 @@ import {
 	ExecutionContext,
 	Injectable,
 	NestInterceptor,
-	StreamableFile,
 } from "@nestjs/common";
 import { map } from "rxjs";
 
@@ -16,17 +15,15 @@ export class ApiResponseInterceptor implements NestInterceptor {
 			return next.handle();
 		}
 
-		return (next.handle() as any).pipe(
+		return next.handle().pipe(
 			map((data: unknown) => {
-				if (data instanceof StreamableFile || this.isApiResponse(data)) {
-					return data;
-				}
-
-				return {
-					ok: true,
-					msg: "success",
-					data: data === undefined ? null : data,
-				} satisfies ApiResponse<unknown>;
+				return this.isApiResponse(data)
+					? data
+					: ({
+							ok: true,
+							msg: "success",
+							data: data === undefined ? null : data,
+						} satisfies ApiResponse<unknown>);
 			}),
 		);
 	}
